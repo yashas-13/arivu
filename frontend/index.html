@@ -5,23 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arivu SCM</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        .container { max-width: 600px; margin: auto; }
-        header { text-align: center; }
-        nav a { margin-right: 10px; }
+        body { font-family: Arial, sans-serif; margin:0; padding:0; }
+        header { background:#0c4a6e; color:white; padding:1rem; text-align:center; }
+        .content { padding:1rem; }
+        nav { display:flex; justify-content:space-around; background:#e2e8f0; padding:0.5rem; }
+        nav a { color:#0c4a6e; text-decoration:none; font-weight:bold; }
+        .card { border:1px solid #ccc; border-radius:8px; padding:1rem; margin-top:1rem; }
+        @media (min-width:600px) {
+            .cards { display:flex; gap:1rem; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Arivu Supply Chain</h1>
-        </header>
-        <nav>
-            <a href="#">Inventory</a>
-            <a href="#">Orders</a>
-            <a href="#">Customers</a>
-        </nav>
-        <p>Mobile friendly placeholder UI.</p>
+    <header>
+        <h1>Arivu Supply Chain</h1>
+    </header>
+    <nav>
+        <a href="#inventory">Inventory</a>
+        <a href="#orders">Orders</a>
+        <a href="#customers">Customers</a>
+    </nav>
+    <div class="content">
+        <div class="cards">
+            <div class="card" id="inventory">
+                <h2>Inventory Item</h2>
+                <pre id="inv"></pre>
+            </div>
+            <div class="card" id="dashboard">
+                <h2>Admin Dashboard</h2>
+                <pre id="dash"></pre>
+            </div>
+        </div>
     </div>
+    <script>
+        async function load() {
+            const inv = await fetch('/inventory/1');
+            if (inv.ok) {
+                document.getElementById('inv').textContent = JSON.stringify(await inv.json(), null, 2);
+            }
+            const dash = await fetch('/dashboard/admin');
+            if (dash.ok) {
+                document.getElementById('dash').textContent = JSON.stringify(await dash.json(), null, 2);
+            }
+        }
+        load();
+    </script>
 </body>
 </html>

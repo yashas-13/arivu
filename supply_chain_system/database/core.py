@@ -1,0 +1,2 @@
+# Placeholder database connection
+DB = {}
