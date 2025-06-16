@@ -10,6 +10,11 @@ class Customer(BaseModel):
 
 customers: Dict[int, Customer] = {}
 
+
+@router.get("/")
+async def list_customers():
+    return list(customers.values())
+
 @router.post("/")
 async def add_customer(customer: Customer):
     customers[customer.id] = customer
