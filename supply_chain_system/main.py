@@ -1,4 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 
 from .inventory.routes import router as inventory_router
 from .orders.routes import router as orders_router
@@ -12,6 +15,9 @@ from .users.routes import router as users_router
 from .reports.routes import router as reports_router
 
 app = FastAPI(title="Arivu Supply Chain")
+
+frontend_path = Path(__file__).resolve().parent.parent / "frontend"
+app.mount("/static", StaticFiles(directory=frontend_path), name="static")
 
 app.include_router(auth_router, prefix="/auth")
 app.include_router(inventory_router, prefix="/inventory")
@@ -27,4 +33,15 @@ app.include_router(reports_router, prefix="/reports")
 
 @app.get("/")
 async def root():
-    return {"message": "Arivu Supply Chain API"}
+    index_file = frontend_path / "index.html"
+    if index_file.exists():
+        return FileResponse(index_file)
+    raise HTTPException(status_code=404, detail="Frontend not found")
+
+
+@app.get("/{page_name}.html")
+async def html_page(page_name: str):
+    file_path = frontend_path / f"{page_name}.html"
+    if file_path.exists():
+        return FileResponse(file_path)
+    raise HTTPException(status_code=404, detail="Page not found")
