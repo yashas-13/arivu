@@ -7,6 +7,7 @@ router = APIRouter()
 class Order(BaseModel):
     id: int
     items: List[int]
+    status: str = "pending"
 
 orders: Dict[int, Order] = {}
 
@@ -18,3 +19,13 @@ async def place_order(order: Order):
 @router.get("/{order_id}")
 async def get_order(order_id: int):
     return orders.get(order_id, {"error": "Order not found"})
+
+
+@router.patch("/{order_id}/status")
+async def update_status(order_id: int, status: str):
+    order = orders.get(order_id)
+    if not order:
+        return {"error": "Order not found"}
+    order.status = status
+    orders[order_id] = order
+    return order
