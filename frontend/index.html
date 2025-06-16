@@ -35,8 +35,14 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const resp = await fetch('/auth/login?username=' + document.getElementById('username').value + '&password=' + document.getElementById('password').value, {method:'POST'});
     if (resp.ok) {
-        localStorage.setItem('token', (await resp.json()).token);
-        window.location.href = '/dashboard.html';
+        const data = await resp.json();
+        localStorage.setItem('token', data.token);
+        const user = document.getElementById('username').value;
+        if (user === 'admin') {
+            window.location.href = '/dashboard.html';
+        } else {
+            window.location.href = '/retailer_dashboard.html';
+        }
     } else {
         alert('Invalid credentials');
     }

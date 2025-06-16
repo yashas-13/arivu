@@ -6,6 +6,7 @@ router = APIRouter()
 
 class Order(BaseModel):
     id: int
+    customer_id: int | None = None
     items: List[int]
     status: str = "pending"
 

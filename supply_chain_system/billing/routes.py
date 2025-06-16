@@ -6,6 +6,7 @@ router = APIRouter()
 
 class Invoice(BaseModel):
     id: int
+    customer_id: int | None = None
     amount: float
     status: str = "unpaid"
 

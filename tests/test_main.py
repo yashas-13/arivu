@@ -25,3 +25,21 @@ def test_register_and_login():
     log = client.post("/auth/login", params={"username": "test", "password": "pass"})
     assert log.status_code == 200
     assert "token" in log.json()
+
+
+def test_dashboards():
+    client.post("/customers", json={"id": 1, "name": "Store"})
+    client.post("/inventory", json={"id": 1, "name": "Flour", "quantity": 3})
+    client.post("/orders", json={"id": 1, "customer_id": 1, "items": [1]})
+    client.post("/invoices", json={"id": 1, "customer_id": 1, "amount": 50.0})
+
+    admin_resp = client.get("/dashboard/admin")
+    assert admin_resp.status_code == 200
+    data = admin_resp.json()
+    assert data["total_sales"] == 50.0
+    assert data["low_stock"][0]["product_id"] == 1
+
+    retailer_resp = client.get("/dashboard/retailer/1")
+    assert retailer_resp.status_code == 200
+    rdata = retailer_resp.json()
+    assert rdata["spend"] == 50.0
