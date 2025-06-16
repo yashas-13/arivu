@@ -54,6 +54,22 @@
                 </div>
             </div>
         </div>
+        <div class="col-12 col-md-6">
+            <div class="card" id="lowStock">
+                <div class="card-body">
+                    <h5 class="card-title">Low Stock</h5>
+                    <ul id="lowStockList" class="list-group list-group-flush"></ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="card" id="topProducts">
+                <div class="card-body">
+                    <h5 class="card-title">Top Products</h5>
+                    <canvas id="topProductsChart" height="120"></canvas>
+                </div>
+            </div>
+        </div>
         <div class="col-12">
             <div class="card" id="invoices">
                 <div class="card-body">
@@ -97,6 +113,8 @@ async function fetchData() {
     if (salesResp.ok) {
         const metrics = await salesResp.json();
         renderChart(metrics);
+        renderTopProducts(metrics.top_products);
+        renderLowStock(metrics.low_stock);
     }
 }
 
@@ -117,6 +135,33 @@ function renderChart(metrics) {
             maintainAspectRatio: false,
             scales: {y: {beginAtZero: true}}
         }
+    });
+}
+
+function renderTopProducts(data) {
+    const ctx = document.getElementById('topProductsChart');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: data.map(d => d.product_id),
+            datasets: [{
+                label: 'Orders',
+                data: data.map(d => d.count),
+                backgroundColor: '#198754'
+            }]
+        },
+        options: {responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}
+    });
+}
+
+function renderLowStock(data) {
+    const list = document.getElementById('lowStockList');
+    list.innerHTML = '';
+    data.forEach(i => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item';
+        li.textContent = `${i.product_id} - ${i.quantity}`;
+        list.appendChild(li);
     });
 }
 
