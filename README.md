@@ -152,3 +152,4 @@ By implementing the above agents and architecture, Arivu Foods will have a centr
 oracle.com
 trilinkftz.com
 . With this foundation in place, Arivu Foods can focus on expanding its market and product offerings, confident that the supply chain system will support and drive that growth.
+\n## Running the API\n\nInstall dependencies and run:\n```\npip install -r requirements.txt\nuvicorn app.main:app --reload\n```\n
