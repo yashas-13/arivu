@@ -12,11 +12,23 @@ def test_root_serves_html():
 
 
 def test_inventory_add_and_get():
-    item = {"id": 1, "name": "Flour", "quantity": 10}
+    item = {"id": 99, "name": "Flour", "quantity": 10}
     add_resp = client.post("/inventory/", json=item)
     assert add_resp.status_code == 200
-    get_resp = client.get("/inventory/1")
+    get_resp = client.get("/inventory/99")
     assert get_resp.json()["name"] == "Flour"
+
+
+def test_inventory_crud():
+    initial = client.get("/inventory")
+    assert len(initial.json()) >= 3
+    item = {"id": 100, "name": "Sugar", "quantity": 5}
+    assert client.post("/inventory", json=item).status_code == 200
+    updated = {"id": 100, "name": "Sugar", "quantity": 8}
+    assert client.put("/inventory/100", json=updated).status_code == 200
+    assert client.delete("/inventory/100").status_code == 200
+    missing = client.get("/inventory/100")
+    assert missing.status_code == 404
 
 
 def test_register_and_login():
