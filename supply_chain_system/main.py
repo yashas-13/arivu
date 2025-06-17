@@ -3,6 +3,8 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 
+from .inventory.init_db import init_inventory
+
 from .inventory.routes import router as inventory_router
 from .orders.routes import router as orders_router
 from .customers.routes import router as customers_router
@@ -15,6 +17,10 @@ from .users.routes import router as users_router
 from .reports.routes import router as reports_router
 
 app = FastAPI(title="Arivu Supply Chain")
+
+@app.on_event("startup")
+def startup():
+    init_inventory()
 
 frontend_path = Path(__file__).resolve().parent.parent / "frontend"
 app.mount("/static", StaticFiles(directory=frontend_path), name="static")

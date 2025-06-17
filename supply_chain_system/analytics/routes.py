@@ -1,8 +1,10 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 # import in-memory stores from other modules
 from ..billing.routes import invoices
-from ..inventory.routes import inventory
+from sqlalchemy.orm import Session
+from ..inventory.models import InventoryItem
+from ..database.core import get_db
 from ..orders.routes import orders
 from ..customers.routes import customers
 
@@ -10,7 +12,7 @@ router = APIRouter()
 
 
 @router.get("/admin")
-async def admin_dashboard():
+async def admin_dashboard(db: Session = Depends(get_db)):
     """Aggregate overall KPIs for the admin dashboard."""
     total_sales = sum(inv.amount for inv in invoices.values())
 
@@ -28,9 +30,8 @@ async def admin_dashboard():
     ]
 
     low_stock = [
-        {"product_id": item.id, "quantity": item.quantity}
-        for item in inventory.values()
-        if item.quantity < 5
+        {"product_id": i.id, "quantity": i.quantity}
+        for i in db.query(InventoryItem).filter(InventoryItem.quantity < 5).all()
     ]
 
     return {
@@ -42,7 +43,7 @@ async def admin_dashboard():
 
 
 @router.get("/retailer/{customer_id}")
-async def retailer_dashboard(customer_id: int):
+async def retailer_dashboard(customer_id: int, db: Session = Depends(get_db)):
     """Return KPIs for a specific retailer."""
     cust_orders = [o for o in orders.values() if o.customer_id == customer_id]
     cust_invoices = [i for i in invoices.values() if i.customer_id == customer_id]
