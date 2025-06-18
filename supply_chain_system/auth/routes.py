@@ -1,100 +1,73 @@
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from typing import Dict, List
+from datetime import datetime, timedelta
+from typing import Optional
+
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, EmailStr
+from jose import jwt
+from passlib.context import CryptContext
+from sqlalchemy.orm import Session
+
+from ..database import SessionLocal, UserModel, Retailer
+from ..utils.logger import logger
+
+SECRET_KEY = "supersecret"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 router = APIRouter()
 
-class Token(BaseModel):
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+def create_token(user_id: int, role: str) -> str:
+    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode = {"sub": str(user_id), "role": role, "exp": expire}
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+
+def verify_password(plain: str, hashed: str) -> bool:
+    return pwd_context.verify(plain, hashed)
+
+
+def hash_password(password: str) -> str:
+    return pwd_context.hash(password)
+
+
+class TokenResponse(BaseModel):
     token: str
     role: str
     id: int
 
-# In-memory user store with sample data
-users_db: Dict[str, Dict[str, str | int]] = {
-    "admin": {"password": "adminpass", "role": "admin", "id": 1},
-    "retailer1": {"password": "retailpass", "role": "retailer", "id": 2},
-}
-
-# Simple token that authorizes admin controlled actions (demo only)
-ADMIN_TOKEN = "adminsecret"
-
-def create_token(username: str) -> str:
-    return f"token-{username}"
-
-class RegisterRequest(BaseModel):
-    username: str
-    password: str
-    role: str
-    admin_token: str | None = None
 
 class LoginRequest(BaseModel):
-    username: str
+    email: str
     password: str
 
-class UpdateRetailerRequest(BaseModel):
-    password: str
-    admin_token: str
 
-@router.post("/register")
-async def register(req: RegisterRequest):
-    """Register a new user.
+@router.post("/login", response_model=TokenResponse)
+def login(req: LoginRequest, db: Session = Depends(get_db)):
+    user = db.query(UserModel).filter(UserModel.username == req.email).first()
+    role = "admin"
+    if not user:
+        retailer = db.query(Retailer).filter(Retailer.email == req.email).first()
+        if not retailer:
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+        user_id = retailer.id
+        role = "retailer"
+        hashed = retailer.password_hash
+    else:
+        user_id = user.id
+        hashed = user.hashed_password
+    if not verify_password(req.password, hashed):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    token = create_token(user_id, role)
+    return TokenResponse(token=token, role=role, id=user_id)
 
-    Retailer accounts require a valid ``admin_token`` so that only admins can
-    create them. Admin accounts can be created without the token for demo
-    purposes.
-    """
-    username = req.username
-    password = req.password
-    role = req.role
-    admin_token = req.admin_token
-    if username in users_db:
-        raise HTTPException(status_code=400, detail="User already exists")
-    if role not in {"admin", "retailer"}:
-        raise HTTPException(status_code=400, detail="Invalid role")
-    if role == "retailer" and admin_token != ADMIN_TOKEN:
-        raise HTTPException(status_code=403, detail="Admin token required")
-    users_db[username] = {"password": password, "role": role}
-    return {"message": "registered"}
-
-@router.post("/login")
-async def login(req: LoginRequest):
-    username = req.username
-    password = req.password
-    user = users_db.get(username)
-    if user and user["password"] == password:
-        return Token(token=create_token(username), role=user["role"], id=user["id"])
-    raise HTTPException(status_code=401, detail="Invalid credentials")
-
-
-@router.get("/retailers")
-async def list_retailers(admin_token: str):
-    if admin_token != ADMIN_TOKEN:
-        raise HTTPException(status_code=403, detail="Admin token required")
-    return [
-        {"username": u, "id": info.get("id")}
-        for u, info in users_db.items()
-        if info["role"] == "retailer"
-    ]
-
-
-@router.put("/retailers/{username}")
-async def update_retailer(username: str, req: UpdateRetailerRequest):
-    if req.admin_token != ADMIN_TOKEN:
-        raise HTTPException(status_code=403, detail="Admin token required")
-    user = users_db.get(username)
-    if not user or user.get("role") != "retailer":
-        raise HTTPException(status_code=404, detail="Retailer not found")
-    user["password"] = req.password
-    users_db[username] = user
-    return {"message": "updated"}
-
-
-@router.delete("/retailers/{username}")
-async def delete_retailer(username: str, admin_token: str):
-    if admin_token != ADMIN_TOKEN:
-        raise HTTPException(status_code=403, detail="Admin token required")
-    user = users_db.get(username)
-    if not user or user.get("role") != "retailer":
-        raise HTTPException(status_code=404, detail="Retailer not found")
-    del users_db[username]
-    return {"message": "deleted"}

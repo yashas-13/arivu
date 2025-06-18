@@ -28,6 +28,7 @@ from .database import (
     OrderItemModel,
     InventoryItemModel,
     UserModel,
+    Retailer,
 )
 
 app = FastAPI(title="Arivu Supply Chain")
@@ -107,10 +108,21 @@ def startup():
         db.add_all(order_items)
 
         users = [
-            UserModel(id=1, username="admin", hashed_password="admin", role="admin"),
-            UserModel(id=2, username="retailer1", hashed_password="retailer", role="retailer"),
+            UserModel(id=1, username="admin", hashed_password="$2b$12$QaNaA6TC6j03eyRPZw1k0.WRQFOkpj7FVdqywwUKo1g5.VboufZye", role="admin")
         ]
         db.add_all(users)
+
+        retailers = [
+            Retailer(
+                id=1,
+                name="Retailer One",
+                email="retailer1@example.com",
+                phone="1234567890",
+                location="City",
+                password_hash="$2b$12$YyHfMQQvo.cBZ1bh0GC8KO1JDsHiUupwQppJE7qOrKvEsp7UE2/eK",
+            )
+        ]
+        db.add_all(retailers)
         db.commit()
 
     db.close()

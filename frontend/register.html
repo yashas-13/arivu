@@ -16,19 +16,12 @@
     <h2 class="mb-4 text-center">Create Account (Admin Only)</h2>
     <form id="registerForm">
         <div class="mb-3">
-            <label class="form-label" for="username">Username</label>
+            <label class="form-label" for="username">Retailer Name</label>
             <input class="form-control" id="username" required>
         </div>
         <div class="mb-3">
             <label class="form-label" for="password">Password</label>
             <input type="password" class="form-control" id="password" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label" for="role">Role</label>
-            <select class="form-select" id="role">
-                <option value="retailer">Retailer</option>
-                <option value="admin">Admin</option>
-            </select>
         </div>
         <button class="btn btn-primary w-100" type="submit">Register</button>
     </form>
@@ -39,17 +32,10 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     e.preventDefault();
     const u = document.getElementById('username').value;
     const p = document.getElementById('password').value;
-    const role = document.getElementById('role').value;
-    const adminToken = 'adminsecret';
-    const body = {username:u, password:p, role};
-    if(role === 'retailer') {
-        body.admin_token = adminToken;
-    }
-    const resp = await apiFetch('/auth/register', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify(body)
-    });
+    const body = {name:u, email:u, password:p};
+    let url = '/admin/retailers';
+    const options = {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)};
+    const resp = await apiFetch(url, options);
     if (resp.ok) {
         alert('Registration successful');
         window.location.href = '/';

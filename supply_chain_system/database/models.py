@@ -1,6 +1,8 @@
 """SQLAlchemy models for core data."""
 
 from sqlalchemy import Column, Integer, String, Float, Date, DateTime
+from sqlalchemy import Boolean
+from datetime import datetime
 
 from .core import Base
 
@@ -119,4 +121,19 @@ class UserModel(Base):
     username = Column(String, unique=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     role = Column(String, nullable=False)
+
+
+class Retailer(Base):
+    """Retailer account details"""
+
+    __tablename__ = "retailers"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    phone = Column(String)
+    location = Column(String)
+    password_hash = Column(String)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
