@@ -13,6 +13,7 @@ from .notifications.routes import router as notifications_router
 from .audit.routes import router as audit_router
 from .users.routes import router as users_router
 from .reports.routes import router as reports_router
+from .products.routes import router as products_router
 
 app = FastAPI(title="Arivu Supply Chain")
 
@@ -29,6 +30,7 @@ app.include_router(analytics_router, prefix="/dashboard")
 app.include_router(notifications_router, prefix="/notify")
 app.include_router(audit_router, prefix="/audit")
 app.include_router(reports_router, prefix="/reports")
+app.include_router(products_router, prefix="/products")
 
 
 @app.get("/")
