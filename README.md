@@ -9,6 +9,16 @@ A modular FastAPI-based B2B supply chain management system for Arivu Foods, supp
 
 Okay, focusing on concise, key features for manufacturing and retail roles for Arivu Foods:
 
+Core Product Identification & Details:
+
+Product Name: (e.g., "Low-Carb Multi Seeds Atta", "Groundnut Oil") - This is the primary display name of the product.
+SKU (Stock Keeping Unit): A unique alphanumeric code for each specific product variant (e.g., AF-LCA-1KG, AF-GNO-1L). This is crucial for tracking.
+Product Description: A more detailed explanation of the product, its key features, and benefits (e.g., "Whole Ground Flax, Sunflower, Melon, Pumpkin Seeds; Rich in Fibre, Protein, Calcium.").
+Category: (e.g., "Flour", "Oil", "Snacks") - For logical grouping and reporting.
+Unit of Measure (UOM): How the product is sold or tracked (e.g., "kg", "Liter", "gram").
+Quantity/Volume per Unit: The specific amount in the UOM (e.g., "1" kg, "1" L, "500" g).
+MRP (Maximum Retail Price): The selling price to the customer (e.g., ₹480)
+
 ## Dashboard Features & Functions: Arivu Foods
 
 ---
@@ -116,7 +126,7 @@ an admin to add new users. When creating a retailer the frontend sends a special
 `admin_token` so that self-registration is blocked.
 
 ### 6. Features
-- Admin dashboard: `/dashboard.html` (auto-redirect after admin login)
+- Admin dashboard: `/admin_dashboard.html` (auto-redirect after admin login)
 - Retailer dashboard: `/retailer_dashboard.html` (auto-redirect after retailer login)
 - Inventory, customer, and invoice management via UI
 - Download invoice PDFs and send emails (demo)
@@ -131,25 +141,6 @@ Sample users, inventory, customers, orders, and invoices are auto-populated on f
 
 ---
 
-## Project Structure
-```
-supply_chain_system/
-├── main.py
-├── auth/ (JWT, login, register)
-├── users/
-├── inventory/
-├── orders/
-├── customers/
-├── billing/
-├── analytics/
-├── reports/
-├── notifications/
-├── audit/
-├── database/ (models, session, core)
-├── utils/
-frontend/
-  ├── index.html, dashboard.html, inventory.html, register.html, retailer_dashboard.html
-```
 
 ---
 
