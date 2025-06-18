@@ -7,6 +7,72 @@ A modular FastAPI-based B2B supply chain management system for Arivu Foods, supp
 - JWT authentication and SQLite persistent storage
 - Real PDF invoice generation and email notifications (demo)
 
+Okay, focusing on concise, key features for manufacturing and retail roles for Arivu Foods:
+
+## Dashboard Features & Functions: Arivu Foods
+
+---
+
+### I. Manufacturer User Dashboard
+
+**Purpose:** To monitor and manage production, raw materials, and quality control.
+
+**Key Features & Sections:**
+
+1.  **Production Overview:**
+    * **"What's Next" Schedule:** Displays upcoming production batches (e.g., "Khapli Wheat Flour - Batch 005 - Start tomorrow").
+    * **Current Production Status:** Real-time progress of ongoing batches (e.g., "Multi Seeds Atta - 70% Complete").
+    * **Alerts:** "Low Capacity Detected," "Production Delay Alert."
+    * **Functions:**
+        * View detailed production orders.
+        * Update batch progress (e.g., "Started," "Completed").
+
+2.  **Raw Material Inventory:**
+    * **"Top 5 Critical Materials":** Visual of essential raw material stock levels (e.g., Sunflower Seeds - 80kg Left).
+    * **Low Stock Warnings:** Highlights materials below reorder point (e.g., "Coconut Powder - LOW STOCK!").
+    * **Functions:**
+        * Quickly access full raw material list.
+        * Initiate a purchase request for a specific material.
+
+3.  **Quality Control (QC) & Batch Traceability:**
+    * **"QC Check Results (Last 24 Hrs)":** Summary of recent QC passes/fails.
+    * **"Batch Status":** Overview of recently produced batches and their QC approval.
+    * **Functions:**
+        * Search by batch number to view full production and QC history.
+        * Log new QC results for incoming raw materials or finished goods.
+
+---
+
+### II. Retailer User Dashboard
+
+**Purpose:** To monitor sales, manage finished goods inventory, and track customer orders.
+
+**Key Features & Sections:**
+
+1.  **Sales Performance:**
+    * **"Today's Sales":** Total revenue and number of orders for the current day.
+    * **"Top 3 Best Sellers (Last 7 Days)":** Shows products generating most revenue/quantity (e.g., "Low-Carb Multi Seeds Atta," "Groundnut Oil").
+    * **Sales Trend:** Simple graph showing daily sales over the last week.
+    * **Functions:**
+        * View detailed sales reports by product or period.
+        * Compare current sales to previous periods.
+
+2.  **Finished Goods Inventory:**
+    * **"Quick Stock Status":** At-a-glance view of essential finished product stock levels (e.g., "Coconut Mixture - 150 units left").
+    * **"Products Nearing Out of Stock":** Highlights items with critically low stock (e.g., "Multi Seed Chakli - 20 units left!").
+    * **Functions:**
+        * Browse full product inventory.
+        * Request stock transfer from manufacturing/warehouse.
+
+3.  **Order Fulfillment:**
+    * **"Pending Orders":** Number of orders awaiting processing/shipping.
+    * **"Recent Shipped Orders":** List of most recently dispatched orders.
+    * **"Returns Pending":** Count of return requests to be processed.
+    * **Functions:**
+        * Click to view full order details.
+        * Change order status (e.g., "Mark as Shipped").
+        * Print shipping labels for selected orders.
+
 ## Features
 - Inventory CRUD, logs, and low stock alerts
 - Product catalog management with SKU, description, and pricing
