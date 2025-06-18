@@ -20,19 +20,28 @@ ADMIN_TOKEN = "adminsecret"
 def create_token(username: str) -> str:
     return f"token-{username}"
 
+class RegisterRequest(BaseModel):
+    username: str
+    password: str
+    role: str
+    admin_token: str | None = None
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
 @router.post("/register")
-async def register(
-    username: str,
-    password: str,
-    role: str,
-    admin_token: str | None = None,
-):
+async def register(req: RegisterRequest):
     """Register a new user.
 
     Retailer accounts require a valid ``admin_token`` so that only admins can
     create them. Admin accounts can be created without the token for demo
     purposes.
     """
+    username = req.username
+    password = req.password
+    role = req.role
+    admin_token = req.admin_token
     if username in users_db:
         raise HTTPException(status_code=400, detail="User already exists")
     if role not in {"admin", "retailer"}:
@@ -43,7 +52,9 @@ async def register(
     return {"message": "registered"}
 
 @router.post("/login")
-async def login(username: str, password: str):
+async def login(req: LoginRequest):
+    username = req.username
+    password = req.password
     user = users_db.get(username)
     if user and user["password"] == password:
         return Token(token=create_token(username), role=user["role"])

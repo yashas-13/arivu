@@ -21,9 +21,10 @@
     <div class="col-auto"><input class="form-control" id="qty" type="number" placeholder="Quantity" required></div>
     <div class="col-auto"><button class="btn btn-primary" type="submit">Save</button></div>
 </form>
+<script src="/static/api.js"></script>
 <script>
 async function load() {
-    const resp = await fetch('/inventory');
+    const resp = await apiFetch('/inventory');
     if(!resp.ok) return;
     const data = await resp.json();
     const tbody = document.querySelector('#invTable tbody');
@@ -35,7 +36,7 @@ async function load() {
         delBtn.textContent = 'Delete';
         delBtn.className = 'btn btn-danger btn-sm';
         delBtn.onclick = async () => {
-            await fetch('/inventory/' + i.id, {method:'DELETE'});
+            await apiFetch('/inventory/' + i.id, {method:'DELETE'});
             load();
         };
         const td = document.createElement('td');
@@ -52,11 +53,11 @@ document.getElementById('itemForm').addEventListener('submit', async e => {
         name: document.getElementById('name').value,
         quantity: parseInt(document.getElementById('qty').value)
     };
-    const method = await fetch('/inventory/' + item.id, {method:'GET'});
+    const method = await apiFetch('/inventory/' + item.id);
     if(method.ok){
-        await fetch('/inventory/' + item.id, {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(item)});
+        await apiFetch('/inventory/' + item.id, {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(item)});
     } else {
-        await fetch('/inventory', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(item)});
+        await apiFetch('/inventory', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(item)});
     }
     document.getElementById('itemForm').reset();
     load();

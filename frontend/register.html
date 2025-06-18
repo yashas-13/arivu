@@ -33,6 +33,7 @@
         <button class="btn btn-primary w-100" type="submit">Register</button>
     </form>
 </div>
+<script src="/static/api.js"></script>
 <script>
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -40,11 +41,15 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     const p = document.getElementById('password').value;
     const role = document.getElementById('role').value;
     const adminToken = 'adminsecret';
-    let url = `/auth/register?username=${u}&password=${p}&role=${role}`;
+    const body = {username:u, password:p, role};
     if(role === 'retailer') {
-        url += `&admin_token=${adminToken}`;
+        body.admin_token = adminToken;
     }
-    const resp = await fetch(url, {method:'POST'});
+    const resp = await apiFetch('/auth/register', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(body)
+    });
     if (resp.ok) {
         alert('Registration successful');
         window.location.href = '/';
