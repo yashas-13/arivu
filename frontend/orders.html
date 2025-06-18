@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Orders</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="p-4">
+<h2 class="mb-3">Orders</h2>
+<table class="table" id="ordersTable">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Retailer</th>
+            <th>Status</th>
+            <th>Total</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+<div class="modal fade" id="orderModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Order Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <ul id="itemList" class="list-group"></ul>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/static/api.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+async function load(){
+    const resp = await apiFetch('/orders');
+    if(!resp.ok) return;
+    const data = await resp.json();
+    const tbody = document.querySelector('#ordersTable tbody');
+    tbody.innerHTML = '';
+    data.forEach(o=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${o.id}</td><td>${o.retailer_id}</td><td>${o.status}</td><td>${o.total_amount}</td>`;
+        const btn = document.createElement('button');
+        btn.textContent = 'View';
+        btn.className = 'btn btn-sm btn-primary';
+        btn.onclick = () => showDetails(o.id);
+        const td = document.createElement('td');
+        td.appendChild(btn);
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+    });
+}
+async function showDetails(id){
+    const resp = await apiFetch('/orders/'+id);
+    if(!resp.ok) return;
+    const order = await resp.json();
+    const list = document.getElementById('itemList');
+    list.innerHTML = '';
+    order.items.forEach(i=>{
+        const li = document.createElement('li');
+        li.className = 'list-group-item';
+        li.textContent = `Product ${i.product_id} x${i.quantity} @ ${i.unit_price}`;
+        list.appendChild(li);
+    });
+    const modal = new bootstrap.Modal(document.getElementById('orderModal'));
+    modal.show();
+}
+load();
+</script>
+</body>
+</html>
