@@ -44,8 +44,9 @@ http://localhost:8000/
   - Password: `retailpass`
 
 ### 5. Registering new users
-Use `/register.html` to create additional accounts. The registration endpoint
-requires a `role` parameter with either `admin` or `retailer`.
+Only admins can create retailer accounts. Open `/register.html` while logged in as
+an admin to add new users. When creating a retailer the frontend sends a special
+`admin_token` so that self-registration is blocked.
 
 ### 6. Features
 - Admin dashboard: `/dashboard.html` (auto-redirect after admin login)

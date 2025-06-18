@@ -42,7 +42,13 @@
             <div class="card" id="inventory">
                 <div class="card-body">
                     <h5 class="card-title">Inventory</h5>
-                    <ul id="invList" class="list-group list-group-flush"></ul>
+                    <ul id="invList" class="list-group list-group-flush mb-3"></ul>
+                    <form id="invForm" class="row g-2">
+                        <div class="col-auto"><input class="form-control" id="invId" placeholder="ID" required></div>
+                        <div class="col-auto"><input class="form-control" id="invName" placeholder="Name" required></div>
+                        <div class="col-auto"><input type="number" class="form-control" id="invQty" placeholder="Qty" required></div>
+                        <div class="col-auto"><button class="btn btn-primary" type="submit">Save</button></div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -51,6 +57,11 @@
                 <div class="card-body">
                     <h5 class="card-title">Customers</h5>
                     <ul id="custList" class="list-group list-group-flush"></ul>
+                    <form id="retForm" class="row g-2 mt-3">
+                        <div class="col-auto"><input class="form-control" id="retUser" placeholder="Username" required></div>
+                        <div class="col-auto"><input class="form-control" id="retPass" type="password" placeholder="Password" required></div>
+                        <div class="col-auto"><button class="btn btn-secondary" type="submit">Add Retailer</button></div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -164,6 +175,39 @@ function renderLowStock(data) {
         list.appendChild(li);
     });
 }
+
+document.getElementById('invForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const item = {
+        id: parseInt(document.getElementById('invId').value),
+        name: document.getElementById('invName').value,
+        quantity: parseInt(document.getElementById('invQty').value)
+    };
+    const check = await fetch('/inventory/' + item.id);
+    if(check.ok){
+        await fetch('/inventory/' + item.id, {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(item)});
+    } else {
+        await fetch('/inventory', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(item)});
+    }
+    e.target.reset();
+    fetchData();
+});
+
+document.getElementById('retForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const u = document.getElementById('retUser').value;
+    const p = document.getElementById('retPass').value;
+    const url = `/auth/register?username=${u}&password=${p}&role=retailer&admin_token=adminsecret`;
+    const resp = await fetch(url, {method:'POST'});
+    if(resp.ok){
+        alert('Retailer created');
+        e.target.reset();
+        fetchData();
+    } else {
+        const data = await resp.json();
+        alert('Error: ' + data.detail);
+    }
+});
 
 fetchData();
 </script>
