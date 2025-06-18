@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Dict, List
-from datetime import date
+import datetime
 
 router = APIRouter()
 
@@ -10,12 +10,12 @@ class ProductionBatch(BaseModel):
     product: str
     status: str
     progress: int = 0
-    scheduled_start: date | None = None
+    scheduled_start: datetime.date | None = None
 
 # Sample in-memory batches
 batches: Dict[int, ProductionBatch] = {
-    1: ProductionBatch(id=1, product="Khapli Wheat Flour", status="scheduled", scheduled_start=date.today()),
-    2: ProductionBatch(id=2, product="Multi Seeds Atta", status="in_progress", progress=70, scheduled_start=date.today()),
+    1: ProductionBatch(id=1, product="Khapli Wheat Flour", status="scheduled", scheduled_start=datetime.date.today()),
+    2: ProductionBatch(id=2, product="Multi Seeds Atta", status="in_progress", progress=70, scheduled_start=datetime.date.today()),
 }
 
 alerts: List[str] = ["Low Capacity Detected"]
