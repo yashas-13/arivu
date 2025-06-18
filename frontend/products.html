@@ -35,9 +35,10 @@
     <div class="col-12"><textarea class="form-control" id="description" placeholder="Description"></textarea></div>
     <div class="col-auto"><button class="btn btn-primary" type="submit">Save</button></div>
 </form>
+<script src="/static/api.js"></script>
 <script>
 async function load() {
-    const resp = await fetch('/products');
+    const resp = await apiFetch('/products');
     if(!resp.ok) return;
     const data = await resp.json();
     const tbody = document.querySelector('#prodTable tbody');
@@ -49,7 +50,7 @@ async function load() {
         delBtn.textContent = 'Delete';
         delBtn.className = 'btn btn-danger btn-sm';
         delBtn.onclick = async () => {
-            await fetch('/products/' + p.id, {method:'DELETE'});
+            await apiFetch('/products/' + p.id, {method:'DELETE'});
             load();
         };
         const td = document.createElement('td');
@@ -71,11 +72,11 @@ document.getElementById('prodForm').addEventListener('submit', async e => {
         quantity_per_unit: parseFloat(document.getElementById('qty').value),
         mrp: parseFloat(document.getElementById('mrp').value)
     };
-    const check = await fetch('/products/' + prod.id);
+    const check = await apiFetch('/products/' + prod.id);
     if(check.ok){
-        await fetch('/products/' + prod.id, {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(prod)});
+        await apiFetch('/products/' + prod.id, {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(prod)});
     } else {
-        await fetch('/products', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(prod)});
+        await apiFetch('/products', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(prod)});
     }
     e.target.reset();
     load();
