@@ -7,11 +7,12 @@ router = APIRouter()
 class Token(BaseModel):
     token: str
     role: str
+    id: int
 
 # In-memory user store with sample data
-users_db: Dict[str, Dict[str, str]] = {
-    "admin": {"password": "adminpass", "role": "admin"},
-    "retailer1": {"password": "retailpass", "role": "retailer"},
+users_db: Dict[str, Dict[str, str | int]] = {
+    "admin": {"password": "adminpass", "role": "admin", "id": 1},
+    "retailer1": {"password": "retailpass", "role": "retailer", "id": 2},
 }
 
 # Simple token that authorizes admin controlled actions (demo only)
@@ -57,5 +58,5 @@ async def login(req: LoginRequest):
     password = req.password
     user = users_db.get(username)
     if user and user["password"] == password:
-        return Token(token=create_token(username), role=user["role"])
+        return Token(token=create_token(username), role=user["role"], id=user["id"])
     raise HTTPException(status_code=401, detail="Invalid credentials")
