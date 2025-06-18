@@ -13,7 +13,7 @@
 </head>
 <body>
 <div class="register-box">
-    <h2 class="mb-4 text-center">Create Account</h2>
+    <h2 class="mb-4 text-center">Create Account (Admin Only)</h2>
     <form id="registerForm">
         <div class="mb-3">
             <label class="form-label" for="username">Username</label>
@@ -39,7 +39,12 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     const u = document.getElementById('username').value;
     const p = document.getElementById('password').value;
     const role = document.getElementById('role').value;
-    const resp = await fetch('/auth/register?username=' + u + '&password=' + p + '&role=' + role, {method:'POST'});
+    const adminToken = 'adminsecret';
+    let url = `/auth/register?username=${u}&password=${p}&role=${role}`;
+    if(role === 'retailer') {
+        url += `&admin_token=${adminToken}`;
+    }
+    const resp = await fetch(url, {method:'POST'});
     if (resp.ok) {
         alert('Registration successful');
         window.location.href = '/';
