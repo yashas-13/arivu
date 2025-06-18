@@ -38,7 +38,26 @@
 </div>
 
 <div class="container py-4">
-    <div class="row text-center mb-4" id="summary">
+    <ul class="nav nav-tabs" id="adminTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab">Home</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="retailers-tab" data-bs-toggle="tab" data-bs-target="#retailersPane" type="button" role="tab">Retailers</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="products-tab" data-bs-toggle="tab" data-bs-target="#productsPane" type="button" role="tab">Products</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="orders-tab" data-bs-toggle="tab" data-bs-target="#ordersPane" type="button" role="tab">Orders</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="shipments-tab" data-bs-toggle="tab" data-bs-target="#shipmentsPane" type="button" role="tab">Shipments</button>
+        </li>
+    </ul>
+    <div class="tab-content pt-3">
+        <div class="tab-pane fade show active" id="home" role="tabpanel">
+            <div class="row text-center mb-4" id="summary">
         <div class="col-md-3 mb-3 mb-md-0">
             <div class="card">
                 <div class="card-body">
@@ -152,6 +171,55 @@
             </div>
         </div>
     </div>
+        </div>
+        <div class="tab-pane fade" id="retailersPane" role="tabpanel">
+            <div class="card" id="retailers">
+                <div class="card-body">
+                    <h5 class="card-title">Retailer Accounts</h5>
+                    <ul id="retailerList" class="list-group list-group-flush"></ul>
+                    <form id="retForm" class="row g-2 mt-3">
+                        <div class="col-auto"><input class="form-control" id="retUser" placeholder="Username" required></div>
+                        <div class="col-auto"><input class="form-control" id="retPass" type="password" placeholder="Password" required></div>
+                        <div class="col-auto"><button class="btn btn-secondary" type="submit">Add Retailer</button></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="productsPane" role="tabpanel">
+            <h5>Products</h5>
+            <table class="table" id="prodTable">
+                <thead>
+                <tr><th>ID</th><th>Name</th><th>SKU</th><th>Stock</th><th>Actions</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <form id="prodForm" class="row g-2">
+                <div class="col-auto"><input class="form-control" id="prodId" placeholder="ID" required></div>
+                <div class="col-auto"><input class="form-control" id="prodName" placeholder="Name" required></div>
+                <div class="col-auto"><input class="form-control" id="prodSku" placeholder="SKU" required></div>
+                <div class="col-auto"><input class="form-control" id="prodStock" type="number" placeholder="Stock" required></div>
+                <div class="col-auto"><button class="btn btn-primary" type="submit">Save</button></div>
+            </form>
+        </div>
+        <div class="tab-pane fade" id="ordersPane" role="tabpanel">
+            <h5>Orders</h5>
+            <table class="table" id="orderTable">
+                <thead>
+                <tr><th>ID</th><th>Retailer</th><th>Total</th><th>Status</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="tab-pane fade" id="shipmentsPane" role="tabpanel">
+            <h5>Shipments</h5>
+            <table class="table" id="shipTable">
+                <thead>
+                <tr><th>Order</th><th>Status</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <script src="/static/api.js"></script>
@@ -253,6 +321,9 @@ async function fetchData() {
             list.appendChild(li);
         });
     }
+
+    loadProducts();
+    loadOrders();
 }
 
 function renderChart(metrics) {
@@ -333,6 +404,46 @@ async function loadLogs(){
     });
 }
 
+async function loadProducts(){
+    const resp = await apiFetch('/products');
+    if(!resp.ok) return;
+    const data = await resp.json();
+    const tbody = document.querySelector('#prodTable tbody');
+    tbody.innerHTML = '';
+    data.forEach(p=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${p.id}</td><td>${p.name}</td><td>${p.sku}</td><td>${p.current_stock_quantity ?? 0}</td>`;
+        const del = document.createElement('button');
+        del.className = 'btn btn-danger btn-sm';
+        del.textContent = 'Delete';
+        del.onclick = async ()=>{await apiFetch('/products/'+p.id,{method:'DELETE'}); loadProducts(); fetchData();};
+        const td = document.createElement('td');
+        td.appendChild(del);
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+    });
+}
+
+async function loadOrders(){
+    const resp = await apiFetch('/orders');
+    if(!resp.ok) return;
+    const data = await resp.json();
+    const tbody = document.querySelector('#orderTable tbody');
+    const shipBody = document.querySelector('#shipTable tbody');
+    tbody.innerHTML = '';
+    shipBody.innerHTML = '';
+    data.forEach(o=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${o.id}</td><td>${o.retailer_id}</td><td>${o.total_amount}</td><td>${o.status}</td>`;
+        tbody.appendChild(tr);
+        if(o.status === 'shipped'){
+            const st = document.createElement('tr');
+            st.innerHTML = `<td>${o.id}</td><td>${o.status}</td>`;
+            shipBody.appendChild(st);
+        }
+    });
+}
+
 
 document.getElementById('invForm').addEventListener('submit', async e => {
     e.preventDefault();
@@ -369,6 +480,25 @@ document.getElementById('retForm').addEventListener('submit', async e => {
         const data = await resp.json();
         alert('Error: ' + data.detail);
     }
+});
+
+document.getElementById('prodForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const prod = {
+        id: parseInt(document.getElementById('prodId').value),
+        name: document.getElementById('prodName').value,
+        sku: document.getElementById('prodSku').value,
+        current_stock_quantity: parseInt(document.getElementById('prodStock').value)
+    };
+    const check = await apiFetch('/products/' + prod.id);
+    if(check.ok){
+        await apiFetch('/products/' + prod.id, {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(prod)});
+    } else {
+        await apiFetch('/products', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(prod)});
+    }
+    e.target.reset();
+    loadProducts();
+    fetchData();
 });
 
 fetchData();
