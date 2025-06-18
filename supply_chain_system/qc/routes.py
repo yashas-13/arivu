@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Dict, List
-from datetime import date
+import datetime
 
 router = APIRouter()
 
@@ -9,7 +9,7 @@ class QCResult(BaseModel):
     id: int
     batch_id: int
     result: str
-    date: date = date.today()
+    date: datetime.date = datetime.date.today()
 
 qc_results: Dict[int, QCResult] = {
     1: QCResult(id=1, batch_id=1, result="pass"),
