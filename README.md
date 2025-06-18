@@ -43,16 +43,20 @@ http://localhost:8000/
   - Username: `retailer1`
   - Password: `retailpass`
 
-### 5. Features
+### 5. Registering new users
+Use `/register.html` to create additional accounts. The registration endpoint
+requires a `role` parameter with either `admin` or `retailer`.
+
+### 6. Features
 - Admin dashboard: `/dashboard.html` (auto-redirect after admin login)
 - Retailer dashboard: `/retailer_dashboard.html` (auto-redirect after retailer login)
 - Inventory, customer, and invoice management via UI
 - Download invoice PDFs and send emails (demo)
 
-### 6. Sample Data
+### 7. Sample Data
 Sample users, inventory, customers, orders, and invoices are auto-populated on first run.
 
-### 7. Notes
+### 8. Notes
 - Email notifications require a local SMTP server (for demo: `python -m smtpd -c DebuggingServer -n localhost:1025`)
 - All data is stored in `arivu.db` (SQLite)
 - All API endpoints require JWT authentication
