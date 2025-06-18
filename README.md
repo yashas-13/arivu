@@ -126,7 +126,7 @@ an admin to add new users. When creating a retailer the frontend sends a special
 `admin_token` so that self-registration is blocked.
 
 ### 6. Features
-- Admin dashboard: `/admin_dashboard.html` (auto-redirect after admin login)
+- Admin dashboard: `/dashboard.html` (auto-redirect after admin login)
 - Retailer dashboard: `/retailer_dashboard.html` (auto-redirect after retailer login)
 - Inventory, customer, and invoice management via UI
 - Download invoice PDFs and send emails (demo)
