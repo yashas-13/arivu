@@ -85,7 +85,7 @@ MRP (Maximum Retail Price): The selling price to the customer (e.g., ₹480)
 
 ## Features
 - Inventory CRUD, logs, and low stock alerts
-- Product catalog management with SKU, description, and pricing
+- Product catalog management with SKU, description, and pricing stored in `arivu.db`
 - Order management with status tracking
 - Customer management (basic CRM)
 - Billing and invoice management (PDF export)
@@ -132,11 +132,11 @@ an admin to add new users. When creating a retailer the frontend sends a special
 - Download invoice PDFs and send emails (demo)
 
 ### 7. Sample Data
-Sample users, inventory, customers, orders, and invoices are auto-populated on first run.
+Sample users, products, inventory, customers, orders, and invoices are auto-populated on first run.
 
 ### 8. Notes
 - Email notifications require a local SMTP server (for demo: `python -m smtpd -c DebuggingServer -n localhost:1025`)
-- All data is stored in `arivu.db` (SQLite)
+- All data is stored in `arivu.db` (SQLite) using SQLAlchemy models
 - All API endpoints require JWT authentication
 
 ---

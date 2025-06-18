@@ -17,11 +17,44 @@ from .products.routes import router as products_router
 from .production.routes import router as production_router
 from .qc.routes import router as qc_router
 from .finished_goods.routes import router as fg_router
+from .database import init_db, SessionLocal, ProductModel
 
 app = FastAPI(title="Arivu Supply Chain")
 
 frontend_path = Path(__file__).resolve().parent.parent / "frontend"
 app.mount("/static", StaticFiles(directory=frontend_path), name="static")
+
+@app.on_event("startup")
+def startup():
+    init_db()
+    # load sample products if DB is empty
+    db = SessionLocal()
+    if not db.query(ProductModel).first():
+        samples = [
+            ProductModel(
+                id=1,
+                name="Low-Carb Multi Seeds Atta",
+                sku="AF-LCA-1KG",
+                description="Whole Ground Flax, Sunflower, Melon, Pumpkin Seeds; Rich in Fibre, Protein, Calcium.",
+                category="Flour",
+                uom="kg",
+                quantity_per_unit=1,
+                mrp=480,
+            ),
+            ProductModel(
+                id=2,
+                name="Groundnut Oil",
+                sku="AF-GNO-1L",
+                description="Cold pressed groundnut oil.",
+                category="Oil",
+                uom="L",
+                quantity_per_unit=1,
+                mrp=250,
+            ),
+        ]
+        db.add_all(samples)
+        db.commit()
+    db.close()
 
 app.include_router(auth_router, prefix="/auth")
 app.include_router(inventory_router, prefix="/inventory")

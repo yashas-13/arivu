@@ -110,7 +110,7 @@ function renderTop(data) {
     const ctx = document.getElementById('retailerTopProducts');
     new Chart(ctx, {
         type: 'bar',
-        data: {labels:data.map(d=>d.product_id), datasets:[{data:data.map(d=>d.count), backgroundColor:'#198754'}]},
+        data: {labels:data.map(d=>d.name), datasets:[{data:data.map(d=>d.count), backgroundColor:'#198754'}]},
         options: {responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}
     });
 }
