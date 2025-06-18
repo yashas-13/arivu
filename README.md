@@ -9,6 +9,7 @@ A modular FastAPI-based B2B supply chain management system for Arivu Foods, supp
 
 ## Features
 - Inventory CRUD, logs, and low stock alerts
+- Product catalog management with SKU, description, and pricing
 - Order management with status tracking
 - Customer management (basic CRM)
 - Billing and invoice management (PDF export)
