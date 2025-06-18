@@ -21,6 +21,8 @@
     <div class="col-auto"><input class="form-control" id="qty" type="number" placeholder="Quantity" required></div>
     <div class="col-auto"><button class="btn btn-primary" type="submit">Save</button></div>
 </form>
+<h4 class="mt-4">Logs</h4>
+<ul id="logList" class="list-group"></ul>
 <script src="/static/api.js"></script>
 <script>
 async function load() {
@@ -43,6 +45,21 @@ async function load() {
         td.appendChild(delBtn);
         tr.appendChild(td);
         tbody.appendChild(tr);
+    });
+    loadLogs();
+}
+
+async function loadLogs(){
+    const resp = await apiFetch('/inventory/logs');
+    if(!resp.ok) return;
+    const data = await resp.json();
+    const list = document.getElementById('logList');
+    list.innerHTML = '';
+    data.logs.forEach(l => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item';
+        li.textContent = l;
+        list.appendChild(li);
     });
 }
 

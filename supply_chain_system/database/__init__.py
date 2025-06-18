@@ -9,6 +9,7 @@ from .models import (
     QCCheckModel,
     OrderModel,
     OrderItemModel,
+    InventoryItemModel,
     ReturnRequestModel,
     UserModel,
 )
@@ -25,6 +26,7 @@ __all__ = [
     "QCCheckModel",
     "OrderModel",
     "OrderItemModel",
+    "InventoryItemModel",
     "ReturnRequestModel",
     "UserModel",
 ]

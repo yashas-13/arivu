@@ -26,6 +26,7 @@ from .database import (
     ProductionBatchModel,
     OrderModel,
     OrderItemModel,
+    InventoryItemModel,
     UserModel,
 )
 
@@ -37,7 +38,7 @@ app.mount("/static", StaticFiles(directory=frontend_path), name="static")
 @app.on_event("startup")
 def startup():
     init_db()
-    # load sample products if DB is empty
+    # load sample data if DB is empty
     db = SessionLocal()
     if not db.query(ProductModel).first():
         samples = [
@@ -50,6 +51,7 @@ def startup():
                 uom="kg",
                 quantity_per_unit=1,
                 mrp=480,
+                current_stock_quantity=100,
             ),
             ProductModel(
                 id=2,
@@ -60,10 +62,25 @@ def startup():
                 uom="L",
                 quantity_per_unit=1,
                 mrp=250,
+                current_stock_quantity=60,
             ),
         ]
         db.add_all(samples)
         db.commit()
+
+        inventory_items = [
+            InventoryItemModel(id=1, name="Rice", quantity=50),
+            InventoryItemModel(id=2, name="Oil", quantity=20),
+            InventoryItemModel(id=3, name="Spices", quantity=30),
+        ]
+        db.add_all(inventory_items)
+        db.commit()
+        from .inventory.routes import inventory_logs
+        inventory_logs.extend([
+            "Preloaded Rice(1) qty 50",
+            "Preloaded Oil(2) qty 20",
+            "Preloaded Spices(3) qty 30",
+        ])
 
         raw_materials = [
             RawMaterialModel(id=1, name="Flax Seeds", stock_qty=100, reorder_point=20),
