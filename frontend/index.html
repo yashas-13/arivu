@@ -16,8 +16,8 @@
     <h2 class="mb-4 text-center">Arivu SCM Login</h2>
     <form id="loginForm">
         <div class="mb-3">
-            <label for="username" class="form-label">Username</label>
-            <input type="text" class="form-control" id="username" required>
+            <label for="username" class="form-label">Email</label>
+            <input type="email" class="form-control" id="username" required>
         </div>
         <div class="mb-3">
             <label for="password" class="form-label">Password</label>
@@ -36,7 +36,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     const resp = await apiFetch('/auth/login', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({username: u, password: p})
+        body: JSON.stringify({email: u, password: p})
     });
     if (resp.ok) {
         const data = await resp.json();
@@ -45,7 +45,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         if (data.role === 'admin') {
             window.location.href = '/admin_dashboard.html';
         } else {
-            window.location.href = '/browse_products.html';
+            window.location.href = '/retailer_dashboard.html';
         }
     } else {
         alert('Invalid credentials');
