@@ -1,197 +1,112 @@
-# `agents.md`
 
-**Arivu Foods – Supply Chain Management System (SCMS)**
-**Architecture: Modular Agent-Based | Tech Stack: Python + FastAPI**
+## Technical Interconnection: Frontend, Backend, Database for AI Code Agent
 
----
-
-## 🧩 Overview
-
-This SCMS is designed to automate and streamline Arivu Foods’ B2B operations between **FMCG Admins** and **Local Retail Stores**, supporting:
-
-* Inventory Tracking & Reorder Logic
-* Order Lifecycle Management
-* Retailer CRM & Terms
-* Auto Invoice & Billing System
-* Sales, Stock & Performance Analytics
-* Dashboards with KPIs
-* Email/SMS Notifications
-* Audit Logs and Role-Based Access
+**Core Principle:** Both Manufacturer and Retailer dashboards are distinct **clients** of a **single, unified backend API**, which in turn interacts with a **single, shared relational database**. The distinction between dashboards lies in the **presentation layer (Frontend UI)** and the **authorization layer (Backend API)** that filters data and actions based on user roles.
 
 ---
 
-## 👤 User Roles
+### 1. The Database (DB) - The Persistent Data Layer
 
-### 1. FMCG Admin
-
-* Full access to product, order, inventory, analytics, billing
-* Configure stock thresholds, credit limits, product pricing
-* Approve, monitor, or auto-process orders
-
-### 2. Local Retail Store
-
-* Place & track orders
-* View invoices & product catalog
-* Analyze order trends via dashboard
-* Limited to their own data
+* **Role:** The immutable, centralized data store for all IMS entities. It guarantees data consistency and ACID properties.
+* **Technologies:** Typically a Relational Database Management System (RDBMS) like PostgreSQL, MySQL, or SQLite for development.
+* **Schema (Shared Models):**
+    * `Product` table: Stores `product_id (PK)`, `name`, `sku`, `category`, `mrp`, `current_stock_quantity`, `unit_of_measure`, `is_active`.
+    * `RawMaterial` table: Stores `material_id (PK)`, `name`, `current_stock_quantity`, `unit_of_measure`, `reorder_point`, `supplier_id (FK)`.
+    * `ProductionBatch` table: Stores `batch_id (PK)`, `product_id (FK)`, `production_date`, `quantity_produced`, `status` (`planned`, `in_progress`, `completed`, `qc_failed`), `cost_per_unit`.
+    * `Order` table: Stores `order_id (PK)`, `customer_id (FK)`, `order_date`, `total_amount`, `status` (`pending`, `processing`, `shipped`, `delivered`, `canceled`).
+    * `OrderItem` table: Stores `order_item_id (PK)`, `order_id (FK)`, `product_id (FK)`, `quantity`, `unit_price`.
+    * `User` table: Stores `user_id (PK)`, `username`, `hashed_password`, `role` (`manufacturer`, `retailer`, `admin`).
+* **Interaction Method:** SQL queries (via an ORM or direct SQL).
 
 ---
 
-## 🧠 Modular Agents Specification
+### 2. The Backend - The Application Logic & API Layer
 
-### 📦 Inventory Management Agent
-
-* Tracks product stock levels per SKU
-* Auto restock alerts when below threshold
-* Stock reservation during order placement
-* Optional expiry date and batch tracking
-* Logs inventory change history
-
-**Endpoints:**
-
-* `GET /inventory`
-* `POST /inventory/update`
-* `GET /inventory/logs`
-
----
-
-### 📬 Order Management Agent
-
-* Validates & processes incoming retailer orders
-* Checks stock availability via inventory agent
-* Handles approval logic (manual/auto)
-* Triggers fulfillment workflow
-* Emits events for notification, billing
-
-**Endpoints:**
-
-* `POST /orders`
-* `GET /orders/{id}`
-* `PATCH /orders/{id}/status`
+* **Role:** Acts as the intermediary between the Frontend and the Database. It enforces business rules, handles authentication/authorization, processes requests, and prepares data.
+* **Technologies:** Python (e.g., Flask, FastAPI), paired with an ORM (e.g., SQLAlchemy) for database interaction.
+* **Key Components & Their Interplay:**
+    * **Application Instance (`inventory_app/__init__.py`):** Initializes the web framework application, configures middleware (e.g., CORS, authentication), and registers blueprints/routers.
+    * **Database Module (`inventory_app/database.py`):** Manages database connection pooling, session creation, and ORM setup. Provides session objects for service/API layers.
+    * **Models (`inventory_app/models/`):** ORM representations of the database schema. Used by the Service layer to interact with the DB.
+    * **Services (`inventory_app/services/`):**
+        * **Business Logic Encapsulation:** Contains methods for all core business operations, independent of HTTP specifics.
+        * Example:
+            * `inventory_service.update_product_stock(product_id, quantity_change, operation_type)`
+            * `production_service.create_production_batch(product_id, planned_quantity)`
+            * `sales_service.process_customer_order(order_payload)`
+        * **Transaction Management:** Ensures atomicity of complex operations (e.g., deducting raw materials while incrementing finished goods in a production completion).
+    * **API Endpoints (`inventory_app/api/`):**
+        * **HTTP Interface:** Defines RESTful endpoints that Frontend clients send requests to.
+        * **Authentication:** Verifies user identity (e.g., token validation).
+        * **Authorization (Role-Based Access Control - RBAC):** Crucial for differentiating dashboard access.
+            * Decorators or middleware associated with specific endpoints check the authenticated user's `role` from the `User` model.
+            * Example:
+                * `/api/production/batches` (POST, PUT, GET): Only accessible to `manufacturer` and `admin` roles.
+                * `/api/orders` (POST, GET): Accessible to `retailer` and `admin` roles.
+                * `/api/products/stock` (GET): Accessible to both `manufacturer` and `retailer` roles (but `manufacturer` might see more granular production-related details).
+        * **Request Handling:** Parses incoming JSON payloads, calls appropriate methods in the `services` layer, and constructs JSON responses.
 
 ---
 
-### 👥 Customer Management Agent
+### 3. The Frontend - The User Interface Layer
 
-* Manages retailer profiles, addresses, credit terms
-* Links all orders/invoices per customer
-* Tracks communication notes (optional)
-* Works with Auth system for login/access
-
-**Endpoints:**
-
-* `GET /customers`
-* `POST /customers`
-* `GET /customers/{id}`
-
----
-
-### 🧾 Billing & Invoice Agent
-
-* Auto-generates invoice after order confirmation
-* Tracks payment status (paid/unpaid/overdue)
-* Exports invoices as PDF
-* Handles credit notes/adjustments
-* Future-ready for online payment integration
-
-**Endpoints:**
-
-* `GET /invoices`
-* `GET /invoices/{id}/pdf`
-* `PATCH /invoices/{id}/mark-paid`
+* **Role:** Provides the visual and interactive interface for users (Manufacturer or Retailer) to interact with the IMS.
+* **Technologies:** HTML (for structure), CSS (for styling), JavaScript (for dynamic behavior and API calls).
+* **Key Components & Their Interplay:**
+    * **HTML Templates (`inventory_app/templates/`):**
+        * `manufacturer_dashboard.html`: Contains specific structural elements for production schedules, raw material displays, QC logs.
+        * `retailer_dashboard.html`: Contains specific structural elements for sales charts, order lists, finished goods stock.
+        * `base.html`: Common layout for navigation, header, footer.
+        * The backend's web framework (e.g., Flask) renders the appropriate template based on the user's role and route.
+    * **JavaScript (`inventory_app/static/js/`):**
+        * **Asynchronous API Calls (AJAX/Fetch API):**
+            * **Manufacturer Dashboard JS:**
+                * `GET /api/production/batches`: Fetches current and planned production orders.
+                * `GET /api/raw_materials/stock`: Fetches real-time raw material inventory levels.
+                * `POST /api/production/batches/{id}/complete`: Sends a request to mark a batch as completed.
+            * **Retailer Dashboard JS:**
+                * `GET /api/sales/daily`: Fetches daily sales figures.
+                * `GET /api/orders?status=pending`: Fetches pending customer orders.
+                * `PUT /api/orders/{id}/status`: Updates an order's status (e.g., to 'shipped').
+                * `GET /api/products/stock?type=finished_goods`: Fetches available finished product stock.
+            * These requests typically include the user's authentication token in the headers.
+        * **DOM Manipulation:** Updates the HTML elements dynamically based on JSON data received from the backend APIs (e.g., populating tables, rendering charts using libraries like Chart.js or D3.js).
+        * **Event Listeners:** Reacts to user interactions (button clicks, form submissions) to trigger API calls.
+        * **Conditional Rendering:** Basic UI elements might be hidden/shown based on user role detected on the frontend (e.g., a "Start Production" button only visible for manufacturers), but *true security relies on backend authorization*.
 
 ---
 
-### 📊 Analytics & Dashboard Agent
+### The Data Flow - How They Connect Technically:
 
-* Aggregates KPIs: revenue, top products, low stock, etc.
-* User-based dashboards: Admin sees all, Retailer sees own data
-* Visualizations: bar, pie, time-series charts
-* Provides downloadable sales/inventory reports
+1.  **User Logs In:**
+    * Frontend (login.html + JS) sends `POST /api/auth/login` with `username` and `password`.
+    * Backend (api/auth.py) authenticates against `User` table in DB. If successful, returns an **authentication token** and the user's `role`.
+    * Frontend stores the token (e.g., in `localStorage`).
 
-**Endpoints:**
+2.  **Dashboard Load/Interaction:**
+    * **Manufacturer:**
+        * Frontend loads `manufacturer_dashboard.html`.
+        * JS makes `GET` requests to backend endpoints like `/api/production/batches` and `/api/raw_materials/stock`, including the auth token.
+        * Backend's API layer:
+            * Validates token.
+            * Checks user's role (e.g., `is_manufacturer()`).
+            * Calls `production_service.get_batches()` and `inventory_service.get_raw_material_stock()`.
+            * Services query the DB (`ProductionBatch`, `RawMaterial` tables).
+            * Backend sends JSON data.
+        * Frontend JS receives JSON, parses it, and renders charts/tables.
+        * If the manufacturer clicks "Complete Batch," Frontend sends `PUT /api/production/batches/{id}/complete`.
+        * Backend updates `ProductionBatch` status and `Product.current_stock_quantity` in DB via `services`.
+    * **Retailer:**
+        * Frontend loads `retailer_dashboard.html`.
+        * JS makes `GET` requests to backend endpoints like `/api/sales/daily` and `/api/products/stock`.
+        * Backend's API layer:
+            * Validates token.
+            * Checks user's role (e.g., `is_retailer()`).
+            * Calls `sales_service.get_daily_sales()` and `inventory_service.get_finished_goods_stock()`.
+            * Services query the DB (`Order`, `OrderItem`, `Product` tables).
+            * Backend sends JSON data.
+        * Frontend JS receives JSON, parses it, and renders charts/tables.
+        * If the retailer clicks "Mark Order Shipped," Frontend sends `PUT /api/orders/{id}/status`.
+        * Backend updates `Order.status` in DB via `services`.
 
-* `GET /dashboard/admin`
-* `GET /dashboard/retailer`
-* `GET /reports/sales?range=monthly`
-
----
-
-### 📢 Notification Agent (Optional Enhancer)
-
-* Sends order, invoice, stock alerts via Email/SMS
-* Triggered via hooks/events in order or billing agents
-
-**Endpoints:**
-
-* `POST /notify/email`
-* `POST /notify/sms`
-
----
-
-### 🛡️ Audit & Logging Agent
-
-* Captures actions: order edits, inventory changes, logins
-* Supports audit trails for enterprise compliance
-
-**Endpoints:**
-
-* `GET /audit/logs`
-* `POST /audit/record`
-
----
-
-## ⚙️ Automation vs Manual Triggers
-
-| Agent         | Manual Control       | Automation Available?       |
-| ------------- | -------------------- | --------------------------- |
-| Inventory     | Manual stock update  | Auto reorder alerts         |
-| Orders        | Admin approval       | Auto-approval mode          |
-| Billing       | Manual payment entry | Auto invoice gen            |
-| Dashboards    | User-driven          | Real-time update via events |
-| Notifications | Optional triggers    | Auto on event hook          |
-
----
-
-## 🧱 Backend Architecture & Stack
-
-| Layer          | Tech/Structure                 |
-| -------------- | ------------------------------ |
-| Framework      | Python + FastAPI               |
-| DB             | PostgreSQL / MySQL             |
-| ORM            | SQLAlchemy                     |
-| Auth           | JWT + RBAC                     |
-| Modularization | Agent-based DDD                |
-| Export Formats | PDF (invoices), XLSX (reports) |
-| Notifications  | SMTP (email), optional SMS API |
-| Hosting Ready  | Docker, Gunicorn/Uvicorn       |
-
----
-
-## 🗂️ Suggested Project Structure
-
-```
-supply_chain_system/
-├── main.py
-├── config/
-│   └── settings.py
-├── auth/                 # JWT + RBAC
-├── users/                # Admin/Retailer profiles
-├── inventory/            # Inventory Agent
-├── orders/               # Order Agent
-├── customers/            # Customer CRM Agent
-├── billing/              # Invoice Agent + PDF
-├── analytics/            # Dashboard KPIs
-├── reports/              # CSV/XLSX exporters
-├── notifications/        # Email/SMS triggers
-├── audit/                # Log & monitor actions
-├── database/             # DB engine, migrations
-├── utils/                # Shared helpers, logger
-└── tests/                # Unit/integration tests
-```
-
----
-
-## ✅ Summary
-
-This `agents.md` defines a scalable, modular FastAPI-based architecture for Arivu Foods’ B2B SCM system. It enables automation, real-time data sync, analytics, billing, and multi-role operations with enterprise security, extensibility, and performance.
+This architecture ensures that both dashboards, though visually distinct and role-segregated, operate on the same canonical data, managed and secured by a robust backend service layer.
