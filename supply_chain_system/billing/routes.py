@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import Dict
+from datetime import date
 
 router = APIRouter()
 
@@ -9,8 +10,12 @@ class Invoice(BaseModel):
     customer_id: int | None = None
     amount: float
     status: str = "unpaid"
+    date: date = date.today()
 
-invoices: Dict[int, Invoice] = {}
+invoices: Dict[int, Invoice] = {
+    1: Invoice(id=1, customer_id=1, amount=150.0, status="paid"),
+    2: Invoice(id=2, customer_id=1, amount=200.0, status="unpaid"),
+}
 
 
 @router.get("/")

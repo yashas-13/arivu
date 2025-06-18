@@ -53,6 +53,23 @@
             </div>
         </div>
         <div class="col-12 col-md-6">
+            <div class="card" id="production">
+                <div class="card-body">
+                    <h5 class="card-title">Production Overview</h5>
+                    <ul id="prodList" class="list-group list-group-flush mb-3"></ul>
+                    <div id="alerts" class="text-danger"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="card" id="qc">
+                <div class="card-body">
+                    <h5 class="card-title">Recent QC Checks</h5>
+                    <ul id="qcList" class="list-group list-group-flush"></ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
             <div class="card" id="customers">
                 <div class="card-body">
                     <h5 class="card-title">Customers</h5>
@@ -127,6 +144,38 @@ async function fetchData() {
         renderTopProducts(metrics.top_products);
         renderLowStock(metrics.low_stock);
     }
+
+    const prodResp = await fetch('/production');
+    if (prodResp.ok) {
+        const data = await prodResp.json();
+        const list = document.getElementById('prodList');
+        list.innerHTML = '';
+        data.forEach(b => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item';
+            li.textContent = `${b.product} - ${b.progress}%`;
+            list.appendChild(li);
+        });
+    }
+
+    const alertResp = await fetch('/production/alerts');
+    if(alertResp.ok){
+        const data = await alertResp.json();
+        document.getElementById('alerts').textContent = data.alerts.join(', ');
+    }
+
+    const qcResp = await fetch('/qc/checks');
+    if(qcResp.ok){
+        const data = await qcResp.json();
+        const list = document.getElementById('qcList');
+        list.innerHTML = '';
+        data.forEach(q => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item';
+            li.textContent = `Batch ${q.batch_id}: ${q.result}`;
+            list.appendChild(li);
+        });
+    }
 }
 
 function renderChart(metrics) {
@@ -175,6 +224,7 @@ function renderLowStock(data) {
         list.appendChild(li);
     });
 }
+
 
 document.getElementById('invForm').addEventListener('submit', async e => {
     e.preventDefault();
