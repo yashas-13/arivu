@@ -41,6 +41,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     if (resp.ok) {
         const data = await resp.json();
         localStorage.setItem('token', data.token);
+        localStorage.setItem('userId', data.id);
         if (data.role === 'admin') {
             window.location.href = '/admin_dashboard.html';
         } else {
