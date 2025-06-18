@@ -3,3 +3,4 @@ uvicorn
 pydantic>=1.10,<2.0
 pytest
 httpx
+sqlalchemy

@@ -203,7 +203,7 @@ function renderTopProducts(data) {
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: data.map(d => d.product_id),
+            labels: data.map(d => d.name),
             datasets: [{
                 label: 'Orders',
                 data: data.map(d => d.count),
@@ -220,7 +220,7 @@ function renderLowStock(data) {
     data.forEach(i => {
         const li = document.createElement('li');
         li.className = 'list-group-item';
-        li.textContent = `${i.product_id} - ${i.quantity}`;
+        li.textContent = `${i.name || i.product_id} - ${i.quantity}`;
         list.appendChild(li);
     });
 }

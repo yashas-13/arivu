@@ -7,6 +7,7 @@ from ..orders.routes import orders
 from ..customers.routes import customers
 from ..finished_goods.routes import finished_goods
 from datetime import date, timedelta
+from ..database import SessionLocal, ProductModel
 
 router = APIRouter()
 
@@ -22,18 +23,20 @@ async def admin_dashboard():
         for item_id in order.items:
             product_counts[item_id] = product_counts.get(item_id, 0) + 1
 
-    top_products = [
-        {"product_id": pid, "count": count}
-        for pid, count in sorted(
-            product_counts.items(), key=lambda x: x[1], reverse=True
-        )
-    ]
+    db = SessionLocal()
+    top_products = []
+    for pid, count in sorted(product_counts.items(), key=lambda x: x[1], reverse=True):
+        prod = db.query(ProductModel).filter(ProductModel.id == pid).first()
+        name = prod.name if prod else str(pid)
+        top_products.append({"product_id": pid, "name": name, "count": count})
+    db.close()
 
-    low_stock = [
-        {"product_id": item.id, "quantity": item.quantity}
-        for item in inventory.values()
-        if item.quantity < 5
-    ]
+    low_stock = []
+    for item in inventory.values():
+        if item.quantity < 5:
+            prod = db.query(ProductModel).filter(ProductModel.id == item.id).first()
+            name = prod.name if prod else str(item.id)
+            low_stock.append({"product_id": item.id, "name": name, "quantity": item.quantity})
 
     # compute sales for last 7 days
     today = date.today()
@@ -67,12 +70,13 @@ async def retailer_dashboard(customer_id: int):
         for item_id in order.items:
             product_counts[item_id] = product_counts.get(item_id, 0) + 1
 
-    top_products = [
-        {"product_id": pid, "count": count}
-        for pid, count in sorted(
-            product_counts.items(), key=lambda x: x[1], reverse=True
-        )
-    ]
+    db = SessionLocal()
+    top_products = []
+    for pid, count in sorted(product_counts.items(), key=lambda x: x[1], reverse=True):
+        prod = db.query(ProductModel).filter(ProductModel.id == pid).first()
+        name = prod.name if prod else str(pid)
+        top_products.append({"product_id": pid, "name": name, "count": count})
+    db.close()
 
     spend = sum(inv.amount for inv in cust_invoices)
 
