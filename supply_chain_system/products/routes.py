@@ -19,6 +19,7 @@ class Product(BaseModel):
     uom: str
     quantity_per_unit: float
     mrp: float
+    current_stock_quantity: int | None = 0
 
 
 def get_db():
@@ -60,6 +61,28 @@ def update_product(product_id: int, product: Product, db: Session = Depends(get_
         setattr(existing, k, v)
     db.commit()
     return product
+
+
+class StockUpdate(BaseModel):
+    quantity: int
+
+
+@router.get("/{product_id}/stock")
+def get_product_stock(product_id: int, db: Session = Depends(get_db)):
+    prod = db.query(ProductModel).filter(ProductModel.id == product_id).first()
+    if not prod:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return {"product_id": product_id, "quantity": prod.current_stock_quantity}
+
+
+@router.put("/{product_id}/stock")
+def update_product_stock(product_id: int, stock: StockUpdate, db: Session = Depends(get_db)):
+    prod = db.query(ProductModel).filter(ProductModel.id == product_id).first()
+    if not prod:
+        raise HTTPException(status_code=404, detail="Product not found")
+    prod.current_stock_quantity = stock.quantity
+    db.commit()
+    return {"product_id": product_id, "quantity": stock.quantity}
 
 
 @router.delete("/{product_id}")

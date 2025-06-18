@@ -13,6 +13,8 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 def init_db():
-    """Create database tables."""
+    """Create or recreate database tables."""
+    if DB_FILE.exists():
+        DB_FILE.unlink()
     Base.metadata.create_all(bind=engine)
 
