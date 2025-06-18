@@ -37,6 +37,32 @@
 </div>
 
 <div class="container py-4">
+    <div class="row text-center mb-4" id="summary">
+        <div class="col-md-4 mb-3 mb-md-0">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Total Sales</h6>
+                    <div class="fs-4" id="totalSales">₹0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3 mb-md-0">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Customers</h6>
+                    <div class="fs-4" id="customerCount">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Inventory Items</h6>
+                    <div class="fs-4" id="inventoryCount">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="row g-3">
         <div class="col-12 col-md-6">
             <div class="card" id="inventory">
@@ -98,6 +124,14 @@
                 </div>
             </div>
         </div>
+        <div class="col-12 col-md-6">
+            <div class="card" id="salesTrend">
+                <div class="card-body">
+                    <h5 class="card-title">Weekly Sales</h5>
+                    <canvas id="salesTrendChart" height="120"></canvas>
+                </div>
+            </div>
+        </div>
         <div class="col-12">
             <div class="card" id="invoices">
                 <div class="card-body">
@@ -117,6 +151,7 @@ async function fetchData() {
     const invResp = await apiFetch('/inventory');
     if (invResp.ok) {
         const data = await invResp.json();
+        document.getElementById('inventoryCount').textContent = data.length;
         const list = document.getElementById('invList');
         list.innerHTML = '';
         data.forEach(i => {
@@ -129,6 +164,7 @@ async function fetchData() {
     const custResp = await apiFetch('/customers');
     if (custResp.ok) {
         const data = await custResp.json();
+        document.getElementById('customerCount').textContent = data.length;
         const list = document.getElementById('custList');
         list.innerHTML = '';
         data.forEach(c => {
@@ -141,7 +177,9 @@ async function fetchData() {
     const salesResp = await apiFetch('/dashboard/admin');
     if (salesResp.ok) {
         const metrics = await salesResp.json();
+        document.getElementById('totalSales').textContent = `₹${metrics.total_sales || 0}`;
         renderChart(metrics);
+        renderSalesTrend(metrics.sales_by_day);
         renderTopProducts(metrics.top_products);
         renderLowStock(metrics.low_stock);
     }
@@ -196,6 +234,23 @@ function renderChart(metrics) {
             maintainAspectRatio: false,
             scales: {y: {beginAtZero: true}}
         }
+    });
+}
+
+function renderSalesTrend(data) {
+    const ctx = document.getElementById('salesTrendChart');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.map(d => d.date),
+            datasets: [{
+                label: 'Sales',
+                data: data.map(d => d.total),
+                borderColor: '#0dcaf0',
+                fill: false
+            }]
+        },
+        options: {responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}
     });
 }
 
