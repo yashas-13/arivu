@@ -32,11 +32,18 @@ def test_inventory_crud():
 
 
 def test_register_and_login():
-    reg = client.post("/auth/register", params={"username": "test", "password": "pass"})
+    reg = client.post(
+        "/auth/register",
+        params={"username": "test", "password": "pass", "role": "retailer"},
+    )
     assert reg.status_code == 200
-    log = client.post("/auth/login", params={"username": "test", "password": "pass"})
+    log = client.post(
+        "/auth/login", params={"username": "test", "password": "pass"}
+    )
     assert log.status_code == 200
-    assert "token" in log.json()
+    body = log.json()
+    assert "token" in body
+    assert body["role"] == "retailer"
 
 
 def test_dashboards():
