@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
+from datetime import date
 
 from .inventory.routes import router as inventory_router
 from .orders.routes import router as orders_router
@@ -17,7 +18,16 @@ from .products.routes import router as products_router
 from .production.routes import router as production_router
 from .qc.routes import router as qc_router
 from .finished_goods.routes import router as fg_router
-from .database import init_db, SessionLocal, ProductModel
+from .database import (
+    init_db,
+    SessionLocal,
+    ProductModel,
+    RawMaterialModel,
+    ProductionBatchModel,
+    OrderModel,
+    OrderItemModel,
+    UserModel,
+)
 
 app = FastAPI(title="Arivu Supply Chain")
 
@@ -54,6 +64,38 @@ def startup():
         ]
         db.add_all(samples)
         db.commit()
+
+        raw_materials = [
+            RawMaterialModel(id=1, name="Flax Seeds", stock_qty=100, reorder_point=20),
+            RawMaterialModel(id=2, name="Sunflower Seeds", stock_qty=50, reorder_point=20),
+        ]
+        db.add_all(raw_materials)
+
+        batches = [
+            ProductionBatchModel(id=1, product_id=1, production_date=date.today(), quantity_produced=200, status="completed"),
+            ProductionBatchModel(id=2, product_id=2, production_date=date.today(), quantity_produced=150, status="in_progress"),
+        ]
+        db.add_all(batches)
+
+        orders = [
+            OrderModel(id=1, retailer_id=1, order_date=date.today(), total_amount=500.0, status="shipped"),
+            OrderModel(id=2, retailer_id=1, order_date=date.today(), total_amount=300.0, status="pending"),
+        ]
+        db.add_all(orders)
+
+        order_items = [
+            OrderItemModel(id=1, order_id=1, product_id=1, quantity=2, unit_price=480),
+            OrderItemModel(id=2, order_id=2, product_id=2, quantity=1, unit_price=250),
+        ]
+        db.add_all(order_items)
+
+        users = [
+            UserModel(id=1, username="admin", hashed_password="admin", role="admin"),
+            UserModel(id=2, username="retailer1", hashed_password="retailer", role="retailer"),
+        ]
+        db.add_all(users)
+        db.commit()
+
     db.close()
 
 app.include_router(auth_router, prefix="/auth")

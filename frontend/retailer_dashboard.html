@@ -71,9 +71,11 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script>
 const customerId = 1; // demo
+const token = localStorage.getItem('token');
+const authHeaders = token ? { 'Authorization': 'Bearer ' + token } : {};
 
 async function fetchData() {
-    const resp = await fetch('/dashboard/retailer/' + customerId);
+    const resp = await fetch('/dashboard/retailer/' + customerId, { headers: authHeaders });
     if (resp.ok) {
         const data = await resp.json();
         renderOrders(data);
