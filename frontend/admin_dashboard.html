@@ -30,7 +30,7 @@
     <div class="offcanvas-body p-0">
         <ul class="list-group list-group-flush">
             <li class="list-group-item"><a href="/inventory.html" class="nav-link" data-bs-dismiss="offcanvas">Inventory</a></li>
-            <li class="list-group-item"><a href="#customers" class="nav-link" data-bs-dismiss="offcanvas">Customers</a></li>
+            <li class="list-group-item"><a href="#retailers" class="nav-link" data-bs-dismiss="offcanvas">Retailers</a></li>
             <li class="list-group-item"><a href="#invoices" class="nav-link" data-bs-dismiss="offcanvas">Invoices</a></li>
         </ul>
     </div>
@@ -49,8 +49,8 @@
         <div class="col-md-4 mb-3 mb-md-0">
             <div class="card">
                 <div class="card-body">
-                    <h6 class="card-title">Customers</h6>
-                    <div class="fs-4" id="customerCount">0</div>
+                    <h6 class="card-title">Retailers</h6>
+                    <div class="fs-4" id="retailerCount">0</div>
                 </div>
             </div>
         </div>
@@ -96,10 +96,10 @@
             </div>
         </div>
         <div class="col-12 col-md-6">
-            <div class="card" id="customers">
+            <div class="card" id="retailers">
                 <div class="card-body">
-                    <h5 class="card-title">Customers</h5>
-                    <ul id="custList" class="list-group list-group-flush"></ul>
+                    <h5 class="card-title">Retailer Accounts</h5>
+                    <ul id="retailerList" class="list-group list-group-flush"></ul>
                     <form id="retForm" class="row g-2 mt-3">
                         <div class="col-auto"><input class="form-control" id="retUser" placeholder="Username" required></div>
                         <div class="col-auto"><input class="form-control" id="retPass" type="password" placeholder="Password" required></div>
@@ -161,17 +161,36 @@ async function fetchData() {
             list.appendChild(li);
         });
     }
-    const custResp = await apiFetch('/customers');
-    if (custResp.ok) {
-        const data = await custResp.json();
-        document.getElementById('customerCount').textContent = data.length;
-        const list = document.getElementById('custList');
+    const retResp = await apiFetch('/auth/retailers?admin_token=adminsecret');
+    if (retResp.ok) {
+        const data = await retResp.json();
+        document.getElementById('retailerCount').textContent = data.length;
+        const list = document.getElementById('retailerList');
         list.innerHTML = '';
-        data.forEach(c => {
+        data.forEach(r => {
             const li = document.createElement('li');
-            li.className = 'list-group-item';
-            li.textContent = c.name;
+            li.className = 'list-group-item d-flex justify-content-between align-items-center';
+            li.innerHTML = `<span>${r.username}</span><div><button class="btn btn-sm btn-primary me-1 edit" data-user="${r.username}">Edit</button><button class="btn btn-sm btn-danger delete" data-user="${r.username}">Delete</button></div>`;
             list.appendChild(li);
+        });
+        list.querySelectorAll('.edit').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const user = btn.getAttribute('data-user');
+                const pw = prompt('New password for ' + user);
+                if(!pw) return;
+                await apiFetch('/auth/retailers/' + user, {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({password:pw, admin_token:'adminsecret'})});
+                alert(`Updated. Username: ${user} Password: ${pw}`);
+                fetchData();
+            });
+        });
+        list.querySelectorAll('.delete').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const user = btn.getAttribute('data-user');
+                if(confirm('Delete retailer ' + user + '?')){
+                    await apiFetch('/auth/retailers/' + user + '?admin_token=adminsecret', {method:'DELETE'});
+                    fetchData();
+                }
+            });
         });
     }
     const salesResp = await apiFetch('/dashboard/admin');
@@ -310,7 +329,7 @@ document.getElementById('retForm').addEventListener('submit', async e => {
         body: JSON.stringify(body)
     });
     if(resp.ok){
-        alert('Retailer created');
+        alert(`Retailer created. Username: ${u} Password: ${p}`);
         e.target.reset();
         fetchData();
     } else {

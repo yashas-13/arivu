@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import Dict
+from typing import Dict, List
 
 router = APIRouter()
 
@@ -31,6 +31,10 @@ class LoginRequest(BaseModel):
     username: str
     password: str
 
+class UpdateRetailerRequest(BaseModel):
+    password: str
+    admin_token: str
+
 @router.post("/register")
 async def register(req: RegisterRequest):
     """Register a new user.
@@ -60,3 +64,37 @@ async def login(req: LoginRequest):
     if user and user["password"] == password:
         return Token(token=create_token(username), role=user["role"], id=user["id"])
     raise HTTPException(status_code=401, detail="Invalid credentials")
+
+
+@router.get("/retailers")
+async def list_retailers(admin_token: str):
+    if admin_token != ADMIN_TOKEN:
+        raise HTTPException(status_code=403, detail="Admin token required")
+    return [
+        {"username": u, "id": info.get("id")}
+        for u, info in users_db.items()
+        if info["role"] == "retailer"
+    ]
+
+
+@router.put("/retailers/{username}")
+async def update_retailer(username: str, req: UpdateRetailerRequest):
+    if req.admin_token != ADMIN_TOKEN:
+        raise HTTPException(status_code=403, detail="Admin token required")
+    user = users_db.get(username)
+    if not user or user.get("role") != "retailer":
+        raise HTTPException(status_code=404, detail="Retailer not found")
+    user["password"] = req.password
+    users_db[username] = user
+    return {"message": "updated"}
+
+
+@router.delete("/retailers/{username}")
+async def delete_retailer(username: str, admin_token: str):
+    if admin_token != ADMIN_TOKEN:
+        raise HTTPException(status_code=403, detail="Admin token required")
+    user = users_db.get(username)
+    if not user or user.get("role") != "retailer":
+        raise HTTPException(status_code=404, detail="Retailer not found")
+    del users_db[username]
+    return {"message": "deleted"}
