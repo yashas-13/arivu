@@ -3,6 +3,7 @@
 from .core import engine, SessionLocal, init_db, Base
 from .models import (
     ProductModel,
+    InventoryItemModel,
     RawMaterialModel,
     ProductionBatchModel,
     MachineModel,
@@ -19,6 +20,7 @@ __all__ = [
     "init_db",
     "Base",
     "ProductModel",
+    "InventoryItemModel",
     "RawMaterialModel",
     "ProductionBatchModel",
     "MachineModel",

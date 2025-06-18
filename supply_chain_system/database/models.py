@@ -16,6 +16,17 @@ class ProductModel(Base):
     uom = Column(String, nullable=False)
     quantity_per_unit = Column(Float, nullable=False)
     mrp = Column(Float, nullable=False)
+    current_stock_quantity = Column(Integer, default=0)
+
+
+class InventoryItemModel(Base):
+    """Simple inventory items used by the demo inventory API."""
+
+    __tablename__ = "inventory_items"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    quantity = Column(Integer, default=0)
 
 
 class RawMaterialModel(Base):

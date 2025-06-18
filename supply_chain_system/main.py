@@ -22,6 +22,7 @@ from .database import (
     init_db,
     SessionLocal,
     ProductModel,
+    InventoryItemModel,
     RawMaterialModel,
     ProductionBatchModel,
     OrderModel,
@@ -50,6 +51,7 @@ def startup():
                 uom="kg",
                 quantity_per_unit=1,
                 mrp=480,
+                current_stock_quantity=100,
             ),
             ProductModel(
                 id=2,
@@ -60,6 +62,7 @@ def startup():
                 uom="L",
                 quantity_per_unit=1,
                 mrp=250,
+                current_stock_quantity=75,
             ),
         ]
         db.add_all(samples)
@@ -94,6 +97,14 @@ def startup():
             UserModel(id=2, username="retailer1", hashed_password="retailer", role="retailer"),
         ]
         db.add_all(users)
+        db.commit()
+
+        inventory_items = [
+            InventoryItemModel(id=1, name="Rice", quantity=50),
+            InventoryItemModel(id=2, name="Oil", quantity=20),
+            InventoryItemModel(id=3, name="Spices", quantity=30),
+        ]
+        db.add_all(inventory_items)
         db.commit()
 
     db.close()

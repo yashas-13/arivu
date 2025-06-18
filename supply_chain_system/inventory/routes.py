@@ -1,6 +1,9 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
-from typing import Dict, List
+from typing import List
+from sqlalchemy.orm import Session
+
+from ..database import SessionLocal, InventoryItemModel
 
 router = APIRouter()
 
@@ -9,57 +12,75 @@ class InventoryItem(BaseModel):
     name: str
     quantity: int
 
-# In-memory store for demo with sample data
-inventory: Dict[int, InventoryItem] = {
-    1: InventoryItem(id=1, name="Rice", quantity=50),
-    2: InventoryItem(id=2, name="Oil", quantity=20),
-    3: InventoryItem(id=3, name="Spices", quantity=30),
-}
+# Simple log list kept in memory
 inventory_logs: List[str] = [
     "Preloaded Rice(1) qty 50",
     "Preloaded Oil(2) qty 20",
     "Preloaded Spices(3) qty 30",
 ]
 
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 @router.get("/")
-async def list_items():
-    return list(inventory.values())
+async def list_items(db: Session = Depends(get_db)):
+    rows = db.query(InventoryItemModel).all()
+    return [InventoryItem(id=r.id, name=r.name, quantity=r.quantity) for r in rows]
 
 
 @router.get("/{item_id}")
-async def get_item(item_id: int):
-    item = inventory.get(item_id)
-    if not item:
+async def get_item(item_id: int, db: Session = Depends(get_db)):
+    row = db.query(InventoryItemModel).filter(InventoryItemModel.id == item_id).first()
+    if not row:
         raise HTTPException(status_code=404, detail="Item not found")
-    return item
+    return InventoryItem(id=row.id, name=row.name, quantity=row.quantity)
 
 @router.post("/")
-async def add_item(item: InventoryItem):
-    inventory[item.id] = item
+async def add_item(item: InventoryItem, db: Session = Depends(get_db)):
+    obj = InventoryItemModel(id=item.id, name=item.name, quantity=item.quantity)
+    db.merge(obj)
+    db.commit()
     inventory_logs.append(f"Added {item.name}({item.id}) qty {item.quantity}")
     return item
 
 
 @router.put("/{item_id}")
-async def update_item(item_id: int, item: InventoryItem):
-    if item_id not in inventory:
+async def update_item(item_id: int, item: InventoryItem, db: Session = Depends(get_db)):
+    row = db.query(InventoryItemModel).filter(InventoryItemModel.id == item_id).first()
+    if not row:
         raise HTTPException(status_code=404, detail="Item not found")
-    inventory[item_id] = item
+    row.name = item.name
+    row.quantity = item.quantity
+    db.commit()
     inventory_logs.append(f"Updated {item.name}({item.id}) qty {item.quantity}")
     return item
 
 @router.post("/update")  # backward compatibility
-async def update_item_post(item: InventoryItem):
-    inventory[item.id] = item
+async def update_item_post(item: InventoryItem, db: Session = Depends(get_db)):
+    row = db.query(InventoryItemModel).filter(InventoryItemModel.id == item.id).first()
+    if row:
+        row.name = item.name
+        row.quantity = item.quantity
+    else:
+        row = InventoryItemModel(id=item.id, name=item.name, quantity=item.quantity)
+        db.add(row)
+    db.commit()
     inventory_logs.append(f"Updated {item.name}({item.id}) qty {item.quantity}")
     return item
 
 @router.delete("/{item_id}")
-async def delete_item(item_id: int):
-    item = inventory.pop(item_id, None)
-    if not item:
+async def delete_item(item_id: int, db: Session = Depends(get_db)):
+    row = db.query(InventoryItemModel).filter(InventoryItemModel.id == item_id).first()
+    if not row:
         raise HTTPException(status_code=404, detail="Item not found")
-    inventory_logs.append(f"Deleted {item.name}({item.id})")
+    db.delete(row)
+    db.commit()
+    inventory_logs.append(f"Deleted {row.name}({row.id})")
     return {"status": "deleted"}
 
 

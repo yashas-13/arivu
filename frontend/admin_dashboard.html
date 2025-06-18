@@ -30,6 +30,7 @@
     <div class="offcanvas-body p-0">
         <ul class="list-group list-group-flush">
             <li class="list-group-item"><a href="/inventory.html" class="nav-link" data-bs-dismiss="offcanvas">Inventory</a></li>
+            <li class="list-group-item"><a href="/products.html" class="nav-link" data-bs-dismiss="offcanvas">Product Inventory</a></li>
             <li class="list-group-item"><a href="#retailers" class="nav-link" data-bs-dismiss="offcanvas">Retailers</a></li>
             <li class="list-group-item"><a href="#invoices" class="nav-link" data-bs-dismiss="offcanvas">Invoices</a></li>
         </ul>
@@ -38,7 +39,7 @@
 
 <div class="container py-4">
     <div class="row text-center mb-4" id="summary">
-        <div class="col-md-4 mb-3 mb-md-0">
+        <div class="col-md-3 mb-3 mb-md-0">
             <div class="card">
                 <div class="card-body">
                     <h6 class="card-title">Total Sales</h6>
@@ -46,7 +47,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3 mb-md-0">
+        <div class="col-md-3 mb-3 mb-md-0">
             <div class="card">
                 <div class="card-body">
                     <h6 class="card-title">Retailers</h6>
@@ -54,11 +55,19 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3 mb-3 mb-md-0">
             <div class="card">
                 <div class="card-body">
                     <h6 class="card-title">Inventory Items</h6>
                     <div class="fs-4" id="inventoryCount">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Product Count</h6>
+                    <div class="fs-4" id="productCount">0</div>
                 </div>
             </div>
         </div>
@@ -69,6 +78,7 @@
                 <div class="card-body">
                     <h5 class="card-title">Inventory</h5>
                     <ul id="invList" class="list-group list-group-flush mb-3"></ul>
+                    <ul id="invLogs" class="list-group list-group-flush small"></ul>
                     <form id="invForm" class="row g-2">
                         <div class="col-auto"><input class="form-control" id="invId" placeholder="ID" required></div>
                         <div class="col-auto"><input class="form-control" id="invName" placeholder="Name" required></div>
@@ -160,6 +170,23 @@ async function fetchData() {
             li.textContent = `${i.name} - ${i.quantity}`;
             list.appendChild(li);
         });
+    }
+    const logResp = await apiFetch('/inventory/logs');
+    if(logResp.ok){
+        const data = await logResp.json();
+        const logs = document.getElementById('invLogs');
+        logs.innerHTML = '';
+        data.logs.forEach(l => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item';
+            li.textContent = l;
+            logs.appendChild(li);
+        });
+    }
+    const prodCatalog = await apiFetch('/products');
+    if(prodCatalog.ok){
+        const data = await prodCatalog.json();
+        document.getElementById('productCount').textContent = data.length;
     }
     const retResp = await apiFetch('/auth/retailers?admin_token=adminsecret');
     if (retResp.ok) {
