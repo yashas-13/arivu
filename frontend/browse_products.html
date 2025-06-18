@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Browse Products</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="p-4">
+<h2 class="mb-3">Browse Products</h2>
+<a href="/my_orders.html">My Orders</a>
+<table class="table" id="prodTable">
+    <thead>
+    <tr><th>ID</th><th>Name</th><th>Price</th><th>Qty</th><th></th></tr>
+    </thead>
+    <tbody></tbody>
+</table>
+<button class="btn btn-primary" id="placeOrder">Place Order</button>
+<script src="/static/api.js"></script>
+<script>
+const retailerId = localStorage.getItem('userId');
+let cart = [];
+async function load(){
+    const resp = await apiFetch('/products');
+    if(!resp.ok) return;
+    const data = await resp.json();
+    const tbody = document.querySelector('#prodTable tbody');
+    tbody.innerHTML='';
+    data.forEach(p=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${p.id}</td><td>${p.name}</td><td>${p.mrp}</td>`;
+        const qty = document.createElement('input');
+        qty.type='number';
+        qty.min=1;
+        qty.value=1;
+        const tdQty = document.createElement('td');
+        tdQty.appendChild(qty);
+        const btn = document.createElement('button');
+        btn.textContent='Add';
+        btn.className='btn btn-sm btn-secondary';
+        btn.onclick=()=>{cart.push({product_id:p.id, quantity:parseInt(qty.value), unit_price:p.mrp}); alert('Added');};
+        const tdBtn = document.createElement('td');
+        tdBtn.appendChild(btn);
+        tr.appendChild(tdQty);
+        tr.appendChild(tdBtn);
+        tbody.appendChild(tr);
+    });
+}
+
+document.getElementById('placeOrder').addEventListener('click', async ()=>{
+    if(!cart.length) return alert('Cart empty');
+    const id = Date.now();
+    const total = cart.reduce((s,i)=>s+i.unit_price*i.quantity,0);
+    await apiFetch('/orders', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({id, retailer_id:parseInt(retailerId), items:cart, total_amount:total})});
+    cart=[];
+    alert('Order placed');
+});
+load();
+</script>
+</body>
+</html>
