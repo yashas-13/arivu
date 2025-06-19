@@ -15,8 +15,8 @@ from ..database import (
 )
 
 
-def get_admin_metrics(db: Session) -> dict:
-    """Compute dashboard metrics for admin users."""
+def get_manufacturer_metrics(db: Session) -> dict:
+    """Compute dashboard metrics for manufacturer (admin) users."""
     total_sales = db.query(func.sum(OrderModel.total_amount)).scalar() or 0
 
     product_counts = (

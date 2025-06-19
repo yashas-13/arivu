@@ -1,16 +1,16 @@
 from fastapi import APIRouter
 
 from ..database import SessionLocal
-from .service import get_admin_metrics, get_retailer_metrics
+from .service import get_manufacturer_metrics, get_retailer_metrics
 
 router = APIRouter()
 
 
-@router.get("/admin")
-async def admin_dashboard():
-    """Aggregate overall KPIs for the admin dashboard from the database."""
+@router.get("/manufacturer")
+async def manufacturer_dashboard():
+    """Aggregate overall KPIs for the manufacturer dashboard from the database."""
     db = SessionLocal()
-    metrics = get_admin_metrics(db)
+    metrics = get_manufacturer_metrics(db)
     db.close()
     return metrics
 
