@@ -108,7 +108,12 @@ def startup():
         db.add_all(order_items)
 
         users = [
-            UserModel(id=1, username="admin", hashed_password="$2b$12$QaNaA6TC6j03eyRPZw1k0.WRQFOkpj7FVdqywwUKo1g5.VboufZye", role="admin")
+            UserModel(
+                id=1,
+                username="manufacturer",
+                hashed_password="$2b$12$LsCAdFgjNOrbVXjv71cOCuiCY7C0.cZmCsTPm8vwcmQ94XkCUEP/O",
+                role="manufacturer",
+            )
         ]
         db.add_all(users)
 

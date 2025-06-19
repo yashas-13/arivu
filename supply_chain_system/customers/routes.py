@@ -74,7 +74,7 @@ class RetailerOut(BaseModel):
         orm_mode = True
 
 
-@router.post("/admin/retailers", response_model=RetailerOut)
+@router.post("/manufacturer/retailers", response_model=RetailerOut)
 def create_retailer(ret: RetailerCreate, db: Session = Depends(get_db)):
     if db.query(Retailer).filter(Retailer.email == ret.email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -92,13 +92,13 @@ def create_retailer(ret: RetailerCreate, db: Session = Depends(get_db)):
     return obj
 
 
-@router.get("/admin/retailers", response_model=List[RetailerOut])
+@router.get("/manufacturer/retailers", response_model=List[RetailerOut])
 def list_retailers(db: Session = Depends(get_db)):
     rows = db.query(Retailer).all()
     return rows
 
 
-@router.get("/admin/retailers/{retailer_id}", response_model=RetailerOut)
+@router.get("/manufacturer/retailers/{retailer_id}", response_model=RetailerOut)
 def get_retailer(retailer_id: int, db: Session = Depends(get_db)):
     obj = db.query(Retailer).filter(Retailer.id == retailer_id).first()
     if not obj:
@@ -106,7 +106,7 @@ def get_retailer(retailer_id: int, db: Session = Depends(get_db)):
     return obj
 
 
-@router.put("/admin/retailers/{retailer_id}", response_model=RetailerOut)
+@router.put("/manufacturer/retailers/{retailer_id}", response_model=RetailerOut)
 def update_retailer(retailer_id: int, ret: RetailerUpdate, db: Session = Depends(get_db)):
     obj = db.query(Retailer).filter(Retailer.id == retailer_id).first()
     if not obj:
@@ -128,7 +128,7 @@ def update_retailer(retailer_id: int, ret: RetailerUpdate, db: Session = Depends
     return obj
 
 
-@router.delete("/admin/retailers/{retailer_id}")
+@router.delete("/manufacturer/retailers/{retailer_id}")
 def delete_retailer(retailer_id: int, db: Session = Depends(get_db)):
     obj = db.query(Retailer).filter(Retailer.id == retailer_id).first()
     if not obj:

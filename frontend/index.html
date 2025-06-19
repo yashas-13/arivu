@@ -42,7 +42,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         const data = await resp.json();
         localStorage.setItem('token', data.token);
         localStorage.setItem('userId', data.id);
-        if (data.role === 'admin') {
+        if (data.role === 'manufacturer') {
             window.location.href = '/manufacturer_dashboard.html';
         } else {
             window.location.href = '/retailer_dashboard.html';

@@ -15,7 +15,7 @@
     * `ProductionBatch` table: Stores `batch_id (PK)`, `product_id (FK)`, `production_date`, `quantity_produced`, `status` (`planned`, `in_progress`, `completed`, `qc_failed`), `cost_per_unit`.
     * `Order` table: Stores `order_id (PK)`, `customer_id (FK)`, `order_date`, `total_amount`, `status` (`pending`, `processing`, `shipped`, `delivered`, `canceled`).
     * `OrderItem` table: Stores `order_item_id (PK)`, `order_id (FK)`, `product_id (FK)`, `quantity`, `unit_price`.
-    * `User` table: Stores `user_id (PK)`, `username`, `hashed_password`, `role` (`manufacturer`, `retailer`, `admin`).
+    * `User` table: Stores `user_id (PK)`, `username`, `hashed_password`, `role` (`manufacturer`, `retailer`).
 * **Interaction Method:** SQL queries (via an ORM or direct SQL).
 
 ---
@@ -35,8 +35,8 @@
         * **Authorization (Role-Based Access Control - RBAC):** Crucial for differentiating dashboard access.
             * Decorators or middleware associated with specific endpoints check the authenticated user's `role` from the `User` model.
             * Example:
-                * `/production` (POST, PUT, GET): Only accessible to `manufacturer` and `admin` roles.
-                * `/orders` (POST, GET): Accessible to `retailer` and `admin` roles.
+                * `/production` (POST, PUT, GET): Only accessible to the `manufacturer` role.
+                * `/orders` (POST, GET): Accessible to both `manufacturer` and `retailer` roles.
                 * `/products/{id}/stock` (GET): Accessible to both `manufacturer` and `retailer` roles (the manufacturer may see additional data).
         * **Request Handling:** Parses incoming JSON payloads, performs DB actions and returns JSON responses.
 
