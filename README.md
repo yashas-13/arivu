@@ -133,6 +133,9 @@ Only the manufacturer can create retailer accounts. Open `/register.html` while 
 the manufacturer to add new users. When creating a retailer the frontend sends a special
 `admin_token` so that self-registration is blocked.
 
+Manufacturers can also register themselves at `/register_manufacturer.html` which
+posts to `/users/manufacturers`.
+
 ### 6. Features
  - Manufacturer dashboard: `/manufacturer_dashboard.html` (auto-redirect after manufacturer login)
 - Retailer dashboard: `/retailer_dashboard.html` (auto-redirect after retailer login)
