@@ -1,8 +1,12 @@
 # Arivu Supply Chain Management System
 
 ## Overview
-A modular FastAPI-based B2B supply chain management system for Arivu Foods, supporting:
-- Inventory, Orders, Customers, Billing, Analytics, Notifications, Audit
+A modular FastAPI-based B2B supply chain management system for Arivu Foods. It
+includes a unified backend and a small HTML/JS frontend.
+
+Main highlights:
+- Inventory, Orders, Customers, Billing, Analytics, Notifications and Audit
+- Production planning, Quality Control and Finished Goods tracking
 - Admin and Retailer user roles
 - JWT authentication and SQLite persistent storage
 - Real PDF invoice generation and email notifications (demo)
@@ -92,6 +96,10 @@ MRP (Maximum Retail Price): The selling price to the customer (e.g., ₹480)
 - Analytics dashboards for admin and retailer
 - Email notifications (requires local SMTP server)
 - Audit logging for sensitive actions
+- Production batches with progress tracking
+- Quality control checks
+- Finished goods inventory
+- Simple reporting endpoints
 - All endpoints protected by JWT authentication
 
 ## Quick Start
