@@ -55,7 +55,7 @@ class LoginRequest(BaseModel):
 @router.post("/login", response_model=TokenResponse)
 def login(req: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(UserModel).filter(UserModel.username == req.email).first()
-    role = "admin"
+    role = "manufacturer"
     if not user:
         retailer = db.query(Retailer).filter(Retailer.email == req.email).first()
         if not retailer:

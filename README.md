@@ -7,7 +7,7 @@ includes a unified backend and a small HTML/JS frontend.
 Main highlights:
 - Inventory, Orders, Customers, Billing, Analytics, Notifications and Audit
 - Production planning, Quality Control and Finished Goods tracking
-- Admin and Retailer user roles
+- Manufacturer and Retailer user roles
 - JWT authentication and SQLite persistent storage
 - Real PDF invoice generation and email notifications (demo)
 
@@ -93,7 +93,7 @@ MRP (Maximum Retail Price): The selling price to the customer (e.g., ₹480)
 - Order management with status tracking
 - Customer management (basic CRM)
 - Billing and invoice management (PDF export)
-- Analytics dashboards for admin and retailer
+- Analytics dashboards for manufacturer and retailer
 - Email notifications (requires local SMTP server)
 - Audit logging for sensitive actions
 - Production batches with progress tracking
@@ -121,20 +121,20 @@ http://localhost:8000/
 ```
 
 ### 4. Login credentials
-- **Admin:**
-  - Username: `admin`
-  - Password: `adminpass`
+- **Manufacturer (Admin):**
+  - Username: `manufacturer`
+  - Password: `manufacturerpass`
 - **Retailer:**
   - Username: `retailer1`
   - Password: `retailpass`
 
 ### 5. Registering new users
-Only admins can create retailer accounts. Open `/register.html` while logged in as
-an admin to add new users. When creating a retailer the frontend sends a special
+Only the manufacturer can create retailer accounts. Open `/register.html` while logged in as
+the manufacturer to add new users. When creating a retailer the frontend sends a special
 `admin_token` so that self-registration is blocked.
 
 ### 6. Features
- - Manufacturer dashboard: `/manufacturer_dashboard.html` (auto-redirect after admin login)
+ - Manufacturer dashboard: `/manufacturer_dashboard.html` (auto-redirect after manufacturer login)
 - Retailer dashboard: `/retailer_dashboard.html` (auto-redirect after retailer login)
 - Inventory, customer, and invoice management via UI
 - Download invoice PDFs and send emails (demo)

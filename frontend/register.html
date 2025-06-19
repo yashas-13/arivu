@@ -13,7 +13,7 @@
 </head>
 <body>
 <div class="register-box">
-    <h2 class="mb-4 text-center">Create Account (Admin Only)</h2>
+    <h2 class="mb-4 text-center">Create Retailer Account (Manufacturer Only)</h2>
     <form id="registerForm">
         <div class="mb-3">
             <label class="form-label" for="username">Retailer Name</label>
@@ -33,7 +33,7 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     const u = document.getElementById('username').value;
     const p = document.getElementById('password').value;
     const body = {name:u, email:u, password:p};
-    let url = '/admin/retailers';
+    let url = '/manufacturer/retailers';
     const options = {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)};
     const resp = await apiFetch(url, options);
     if (resp.ok) {
