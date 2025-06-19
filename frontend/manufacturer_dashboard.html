@@ -306,7 +306,7 @@ async function fetchData() {
             });
         });
     }
-    const salesResp = await apiFetch('/dashboard/admin');
+    const salesResp = await apiFetch('/dashboard/manufacturer');
     if (salesResp.ok) {
         const metrics = await salesResp.json();
         document.getElementById('totalSales').textContent = `₹${metrics.total_sales || 0}`;
