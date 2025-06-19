@@ -129,9 +129,9 @@ http://localhost:8000/
   - Password: `retailpass`
 
 ### 5. Registering new users
-Only the manufacturer can create retailer accounts. Open `/register.html` while logged in as
-the manufacturer to add new users. When creating a retailer the frontend sends a special
-`admin_token` so that self-registration is blocked.
+Manufacturers can self-register using `/manufacturer_register.html`.
+Existing manufacturers may also create retailer accounts by opening `/register.html` while logged in.
+When creating a retailer the frontend sends a special `admin_token` so that self-registration for retailers is blocked.
 
 ### 6. Features
  - Manufacturer dashboard: `/manufacturer_dashboard.html` (auto-redirect after manufacturer login)
