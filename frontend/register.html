@@ -33,7 +33,7 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     const u = document.getElementById('username').value;
     const p = document.getElementById('password').value;
     const body = {name:u, email:u, password:p};
-    let url = '/manufacturer/retailers';
+    let url = '/customers/manufacturer/retailers';
     const options = {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)};
     const resp = await apiFetch(url, options);
     if (resp.ok) {
