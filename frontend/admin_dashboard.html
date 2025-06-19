@@ -29,15 +29,24 @@
     </div>
     <div class="offcanvas-body p-0">
         <ul class="list-group list-group-flush">
-            <li class="list-group-item"><a href="/inventory.html" class="nav-link" data-bs-dismiss="offcanvas">Inventory</a></li>
-            <li class="list-group-item"><a href="/products.html" class="nav-link" data-bs-dismiss="offcanvas">Product Inventory</a></li>
-            <li class="list-group-item"><a href="#retailers" class="nav-link" data-bs-dismiss="offcanvas">Retailers</a></li>
-            <li class="list-group-item"><a href="#invoices" class="nav-link" data-bs-dismiss="offcanvas">Invoices</a></li>
+            <li class="list-group-item"><a href="/retailers.html" class="nav-link" data-bs-dismiss="offcanvas">Retailers</a></li>
+            <li class="list-group-item"><a href="/products.html" class="nav-link" data-bs-dismiss="offcanvas">Products</a></li>
+            <li class="list-group-item"><a href="/orders.html" class="nav-link" data-bs-dismiss="offcanvas">Orders</a></li>
+            <li class="list-group-item"><a href="/shipments.html" class="nav-link" data-bs-dismiss="offcanvas">Shipments</a></li>
         </ul>
     </div>
 </div>
 
 <div class="container py-4">
+
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item"><a class="nav-link" href="/products.html">Products</a></li>
+        <li class="nav-item"><a class="nav-link" href="/retailers.html">Retailers</a></li>
+        <li class="nav-item"><a class="nav-link" href="/orders.html">Orders</a></li>
+        <li class="nav-item"><a class="nav-link" href="/shipments.html">Shipments</a></li>
+    </ul>
+    <div class="row text-center mb-4" id="summary">
+
     <ul class="nav nav-tabs" id="adminTabs" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab">Home</button>
@@ -58,6 +67,7 @@
     <div class="tab-content pt-3">
         <div class="tab-pane fade show active" id="home" role="tabpanel">
             <div class="row text-center mb-4" id="summary">
+
         <div class="col-md-3 mb-3 mb-md-0">
             <div class="card">
                 <div class="card-body">
