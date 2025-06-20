@@ -13,7 +13,7 @@
 </head>
 <body>
 <div class="container py-4">
-    <ul class="nav nav-tabs" id="retailerTabs" role="tablist">
+    <ul class="nav nav-tabs" id="retTabs" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="dash-tab" data-bs-toggle="tab" data-bs-target="#dashPane" type="button" role="tab">Dashboard</button>
         </li>
@@ -25,80 +25,76 @@
         </li>
     </ul>
     <div class="tab-content pt-3">
-        <div class="tab-pane fade show active" id="dashPane" role="tabpanel">
-            <div class="row g-3">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Your Orders</h5>
-                            <ul id="orderList" class="list-group list-group-flush"></ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Today's Sales</h5>
-                            <div id="todaySales" class="fs-4"></div>
-                            <canvas id="salesTrend" height="120"></canvas>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Spend</h5>
-                            <canvas id="spendChart" height="120"></canvas>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Finished Goods</h5>
-                            <ul id="fgList" class="list-group list-group-flush"></ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Order Fulfillment</h5>
-                            <div id="pending" class="mb-2"></div>
-                            <div id="shipped" class="mb-2"></div>
-                            <div id="returns"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Top Products</h5>
-                            <canvas id="retailerTopProducts" height="120"></canvas>
-                        </div>
-                    </div>
+    <div class="tab-pane fade show active" id="dashPane" role="tabpanel">
+    <div class="row g-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Your Orders</h5>
+                    <ul id="orderList" class="list-group list-group-flush"></ul>
                 </div>
             </div>
         </div>
-        <div class="tab-pane fade" id="browsePane" role="tabpanel">
-            <h5>Browse Products</h5>
-            <table class="table" id="prodTable">
-                <thead>
-                <tr><th>ID</th><th>Name</th><th>Price</th><th>Qty</th><th></th></tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-            <button class="btn btn-primary" id="placeOrder">Place Order</button>
+        <div class="col-12 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Today's Sales</h5>
+                    <div id="todaySales" class="fs-4"></div>
+                    <canvas id="salesTrend" height="120"></canvas>
+                </div>
+            </div>
         </div>
-        <div class="tab-pane fade" id="ordersPane" role="tabpanel">
-            <h5>My Orders</h5>
-            <table class="table" id="orderTable">
-                <thead>
-                <tr><th>ID</th><th>Date</th><th>Total</th><th>Status</th></tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+        <div class="col-12 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Spend</h5>
+                    <canvas id="spendChart" height="120"></canvas>
+                </div>
+            </div>
+@@ -44,58 +57,78 @@
+                <div class="card-body">
+                    <h5 class="card-title">Finished Goods</h5>
+                    <ul id="fgList" class="list-group list-group-flush"></ul>
+                </div>
+            </div>
         </div>
+        <div class="col-12 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Order Fulfillment</h5>
+                    <div id="pending" class="mb-2"></div>
+                    <div id="shipped" class="mb-2"></div>
+                    <div id="returns"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Top Products</h5>
+                    <canvas id="retailerTopProducts" height="120"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    <div class="tab-pane fade" id="browsePane" role="tabpanel">
+        <table class="table" id="prodTable">
+            <thead>
+            <tr><th>ID</th><th>Name</th><th>Price</th><th>Qty</th><th></th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <button class="btn btn-primary" id="placeOrder">Place Order</button>
+    </div>
+    <div class="tab-pane fade" id="ordersPane" role="tabpanel">
+        <table class="table" id="orderTable">
+            <thead>
+            <tr><th>ID</th><th>Date</th><th>Total</th><th>Status</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
     </div>
 </div>
 <script src="/static/api.js"></script>
@@ -106,8 +102,9 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script>
 const customerId = localStorage.getItem('userId');
+let cart = [];
 
-async function fetchData() {
+async function fetchDashboard() {
     const resp = await apiFetch('/dashboard/retailer/' + customerId);
     if (resp.ok) {
         const data = await resp.json();
@@ -133,29 +130,7 @@ function renderOrders(data) {
 }
 
 function renderSpend(amount) {
-    const ctx = document.getElementById('spendChart');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {labels:['Spend'], datasets:[{data:[amount], backgroundColor:'#0d6efd'}]},
-        options: {responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}
-    });
-}
-
-function renderTop(data) {
-    const ctx = document.getElementById('retailerTopProducts');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {labels:data.map(d=>d.name), datasets:[{data:data.map(d=>d.count), backgroundColor:'#198754'}]},
-        options: {responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}
-    });
-}
-
-function renderTodaySales(amount){
-    document.getElementById('todaySales').textContent = `₹${amount}`;
-}
-
-function renderTrend(data){
-    const ctx = document.getElementById('salesTrend');
+@@ -125,29 +158,81 @@ function renderTrend(data){
     new Chart(ctx, {
         type:'line',
         data:{labels:data.map(d=>d.date), datasets:[{data:data.map(d=>d.total), borderColor:'#0dcaf0'}]},
@@ -180,8 +155,6 @@ function renderFulfillment(count){
     document.getElementById('shipped').textContent = `Recent Shipped Orders: 0`;
     document.getElementById('returns').textContent = `Returns Pending: 0`;
 }
-
-let cart = [];
 
 async function loadProducts(){
     const resp = await apiFetch('/products');
@@ -231,10 +204,9 @@ document.getElementById('placeOrder').addEventListener('click', async ()=>{
     cart=[];
     alert('Order placed');
     loadOrders();
-    fetchData();
 });
 
-fetchData();
+fetchDashboard();
 loadProducts();
 loadOrders();
 </script>
