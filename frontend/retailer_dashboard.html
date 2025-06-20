@@ -51,9 +51,7 @@
                     <canvas id="spendChart" height="120"></canvas>
                 </div>
             </div>
-        </div>
-        <div class="col-12 col-md-6">
-            <div class="card">
+@@ -44,58 +57,78 @@
                 <div class="card-body">
                     <h5 class="card-title">Finished Goods</h5>
                     <ul id="fgList" class="list-group list-group-flush"></ul>
@@ -132,29 +130,7 @@ function renderOrders(data) {
 }
 
 function renderSpend(amount) {
-    const ctx = document.getElementById('spendChart');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {labels:['Spend'], datasets:[{data:[amount], backgroundColor:'#0d6efd'}]},
-        options: {responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}
-    });
-}
-
-function renderTop(data) {
-    const ctx = document.getElementById('retailerTopProducts');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {labels:data.map(d=>d.name), datasets:[{data:data.map(d=>d.count), backgroundColor:'#198754'}]},
-        options: {responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}
-    });
-}
-
-function renderTodaySales(amount){
-    document.getElementById('todaySales').textContent = `₹${amount}`;
-}
-
-function renderTrend(data){
-    const ctx = document.getElementById('salesTrend');
+@@ -125,29 +158,81 @@ function renderTrend(data){
     new Chart(ctx, {
         type:'line',
         data:{labels:data.map(d=>d.date), datasets:[{data:data.map(d=>d.total), borderColor:'#0dcaf0'}]},
