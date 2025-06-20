@@ -13,57 +13,89 @@
 </head>
 <body>
 <div class="container py-4">
-    <div class="row g-3">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Your Orders</h5>
-                    <ul id="orderList" class="list-group list-group-flush"></ul>
+    <ul class="nav nav-tabs" id="retTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="dash-tab" data-bs-toggle="tab" data-bs-target="#dashPane" type="button" role="tab">Dashboard</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="browse-tab" data-bs-toggle="tab" data-bs-target="#browsePane" type="button" role="tab">Browse Products</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="orders-tab" data-bs-toggle="tab" data-bs-target="#ordersPane" type="button" role="tab">My Orders</button>
+        </li>
+    </ul>
+    <div class="tab-content pt-3">
+        <div class="tab-pane fade show active" id="dashPane" role="tabpanel">
+            <div class="row g-3">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Your Orders</h5>
+                            <ul id="orderList" class="list-group list-group-flush"></ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Today's Sales</h5>
+                            <div id="todaySales" class="fs-4"></div>
+                            <canvas id="salesTrend" height="120"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Spend</h5>
+                            <canvas id="spendChart" height="120"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Finished Goods</h5>
+                            <ul id="fgList" class="list-group list-group-flush"></ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Order Fulfillment</h5>
+                            <div id="pending" class="mb-2"></div>
+                            <div id="shipped" class="mb-2"></div>
+                            <div id="returns"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Top Products</h5>
+                            <canvas id="retailerTopProducts" height="120"></canvas>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-12 col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Today's Sales</h5>
-                    <div id="todaySales" class="fs-4"></div>
-                    <canvas id="salesTrend" height="120"></canvas>
-                </div>
-            </div>
+        <div class="tab-pane fade" id="browsePane" role="tabpanel">
+            <table class="table" id="prodTable">
+                <thead>
+                    <tr><th>ID</th><th>Name</th><th>Price</th><th>Qty</th><th></th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <button class="btn btn-primary" id="placeOrder">Place Order</button>
         </div>
-        <div class="col-12 col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Spend</h5>
-                    <canvas id="spendChart" height="120"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Finished Goods</h5>
-                    <ul id="fgList" class="list-group list-group-flush"></ul>
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Order Fulfillment</h5>
-                    <div id="pending" class="mb-2"></div>
-                    <div id="shipped" class="mb-2"></div>
-                    <div id="returns"></div>
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Top Products</h5>
-                    <canvas id="retailerTopProducts" height="120"></canvas>
-                </div>
-            </div>
+        <div class="tab-pane fade" id="ordersPane" role="tabpanel">
+            <table class="table" id="orderTable">
+                <thead>
+                    <tr><th>ID</th><th>Date</th><th>Total</th><th>Status</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -72,12 +104,13 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script>
 const customerId = localStorage.getItem('userId');
+let cart = [];
 
-async function fetchData() {
+async function fetchData(){
     const resp = await apiFetch('/dashboard/retailer/' + customerId);
-    if (resp.ok) {
+    if(resp.ok){
         const data = await resp.json();
-        renderOrders(data);
+        renderOrdersSummary(data);
         renderSpend(data.spend);
         renderTop(data.top_products);
         renderTodaySales(data.today_sales);
@@ -87,67 +120,109 @@ async function fetchData() {
     }
 }
 
-function renderOrders(data) {
+function renderOrdersSummary(data){
     const list = document.getElementById('orderList');
-    list.innerHTML = '';
-    for (let i = 0; i < data.orders; i++) {
+    list.innerHTML='';
+    for(let i=0;i<data.orders;i++){
         const li = document.createElement('li');
-        li.className = 'list-group-item';
-        li.textContent = 'Order #' + (i+1);
+        li.className='list-group-item';
+        li.textContent='Order #' + (i+1);
         list.appendChild(li);
     }
 }
 
-function renderSpend(amount) {
+function renderSpend(amount){
     const ctx = document.getElementById('spendChart');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {labels:['Spend'], datasets:[{data:[amount], backgroundColor:'#0d6efd'}]},
-        options: {responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}
-    });
+    new Chart(ctx,{type:'bar',data:{labels:['Spend'],datasets:[{data:[amount],backgroundColor:'#0d6efd'}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}});
 }
 
-function renderTop(data) {
+function renderTop(data){
     const ctx = document.getElementById('retailerTopProducts');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {labels:data.map(d=>d.name), datasets:[{data:data.map(d=>d.count), backgroundColor:'#198754'}]},
-        options: {responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}
-    });
+    new Chart(ctx,{type:'bar',data:{labels:data.map(d=>d.name),datasets:[{data:data.map(d=>d.count),backgroundColor:'#198754'}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}});
 }
 
 function renderTodaySales(amount){
-    document.getElementById('todaySales').textContent = `₹${amount}`;
+    document.getElementById('todaySales').textContent=`₹${amount}`;
 }
 
 function renderTrend(data){
-    const ctx = document.getElementById('salesTrend');
-    new Chart(ctx, {
-        type:'line',
-        data:{labels:data.map(d=>d.date), datasets:[{data:data.map(d=>d.total), borderColor:'#0dcaf0'}]},
-        options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}
-    });
+    const ctx=document.getElementById('salesTrend');
+    new Chart(ctx,{type:'line',data:{labels:data.map(d=>d.date),datasets:[{data:data.map(d=>d.total),borderColor:'#0dcaf0'}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}});
 }
 
-function renderFinishedGoods(list, low){
-    const ul = document.getElementById('fgList');
-    ul.innerHTML = '';
+function renderFinishedGoods(list,low){
+    const ul=document.getElementById('fgList');
+    ul.innerHTML='';
     list.forEach(g=>{
-        const li = document.createElement('li');
-        li.className = 'list-group-item';
-        li.textContent = `${g.name} - ${g.quantity}`;
+        const li=document.createElement('li');
+        li.className='list-group-item';
+        li.textContent=`${g.name} - ${g.quantity}`;
         if(low.find(l=>l.id===g.id)) li.classList.add('text-danger');
         ul.appendChild(li);
     });
 }
 
 function renderFulfillment(count){
-    document.getElementById('pending').textContent = `Pending Orders: ${count}`;
-    document.getElementById('shipped').textContent = `Recent Shipped Orders: 0`;
-    document.getElementById('returns').textContent = `Returns Pending: 0`;
+    document.getElementById('pending').textContent=`Pending Orders: ${count}`;
+    document.getElementById('shipped').textContent='Recent Shipped Orders: 0';
+    document.getElementById('returns').textContent='Returns Pending: 0';
+}
+
+async function loadProducts(){
+    const resp=await apiFetch('/products');
+    if(!resp.ok) return;
+    const data=await resp.json();
+    const tbody=document.querySelector('#prodTable tbody');
+    tbody.innerHTML='';
+    data.forEach(p=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${p.id}</td><td>${p.name}</td><td>${p.mrp}</td>`;
+        const qty=document.createElement('input');
+        qty.type='number';
+        qty.min=1;
+        qty.value=1;
+        const tdQty=document.createElement('td');
+        tdQty.appendChild(qty);
+        const btn=document.createElement('button');
+        btn.textContent='Add';
+        btn.className='btn btn-sm btn-secondary';
+        btn.onclick=()=>{cart.push({product_id:p.id,quantity:parseInt(qty.value),unit_price:p.mrp});alert('Added');};
+        const tdBtn=document.createElement('td');
+        tdBtn.appendChild(btn);
+        tr.appendChild(tdQty);
+        tr.appendChild(tdBtn);
+        tbody.appendChild(tr);
+    });
+}
+
+async function placeOrder(){
+    if(!cart.length) return alert('Cart empty');
+    const id=Date.now();
+    const total=cart.reduce((s,i)=>s+i.unit_price*i.quantity,0);
+    await apiFetch('/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,retailer_id:parseInt(customerId),items:cart,total_amount:total})});
+    cart=[];
+    alert('Order placed');
+    loadOrders();
+}
+
+document.getElementById('placeOrder').addEventListener('click',placeOrder);
+
+async function loadOrders(){
+    const resp=await apiFetch('/orders');
+    if(!resp.ok) return;
+    const data=await resp.json();
+    const tbody=document.querySelector('#orderTable tbody');
+    tbody.innerHTML='';
+    data.filter(o=>o.retailer_id==customerId).forEach(o=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${o.id}</td><td>${o.order_date||''}</td><td>${o.total_amount}</td><td>${o.status}</td>`;
+        tbody.appendChild(tr);
+    });
 }
 
 fetchData();
+loadProducts();
+loadOrders();
 </script>
 </body>
 </html>
