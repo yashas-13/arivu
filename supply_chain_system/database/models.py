@@ -137,3 +137,25 @@ class Retailer(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+
+class LeadModel(Base):
+    """Potential retailer leads for CRM"""
+
+    __tablename__ = "leads"
+
+    id = Column(Integer, primary_key=True)
+    company_name = Column(String, nullable=False)
+    contact_person = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    phone = Column(String)
+    location = Column(String)
+    business_type = Column(String)  # grocery store, supermarket, etc.
+    expected_volume = Column(String)  # low, medium, high
+    status = Column(String, default="new")  # new, contacted, qualified, converted, lost
+    source = Column(String)  # website, referral, cold_call, etc.
+    assigned_to = Column(Integer)  # sales manager user ID
+    notes = Column(String)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    converted_retailer_id = Column(Integer)  # ID of retailer if converted
+

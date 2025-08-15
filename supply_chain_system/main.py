@@ -18,6 +18,7 @@ from .products.routes import router as products_router
 from .production.routes import router as production_router
 from .qc.routes import router as qc_router
 from .finished_goods.routes import router as fg_router
+from .leads.routes import router as leads_router
 from .database import (
     init_db,
     SessionLocal,
@@ -29,6 +30,7 @@ from .database import (
     InventoryItemModel,
     UserModel,
     Retailer,
+    LeadModel,
 )
 
 app = FastAPI(title="Arivu Supply Chain")
@@ -113,6 +115,12 @@ def startup():
                 username="manufacturer",
                 hashed_password="$2b$12$LsCAdFgjNOrbVXjv71cOCuiCY7C0.cZmCsTPm8vwcmQ94XkCUEP/O",
                 role="manufacturer",
+            ),
+            UserModel(
+                id=2,
+                username="sales_manager",
+                hashed_password="$2b$12$LsCAdFgjNOrbVXjv71cOCuiCY7C0.cZmCsTPm8vwcmQ94XkCUEP/O",
+                role="sales_manager",
             )
         ]
         db.add_all(users)
@@ -128,6 +136,50 @@ def startup():
             )
         ]
         db.add_all(retailers)
+
+        # Add sample leads for CRM demo
+        leads = [
+            LeadModel(
+                id=1,
+                company_name="Fresh Market Groceries",
+                contact_person="John Smith",
+                email="john@freshmarket.com",
+                phone="9876543210",
+                location="Downtown",
+                business_type="grocery_store",
+                expected_volume="high",
+                status="new",
+                source="website",
+                notes="Interested in bulk orders for organic products"
+            ),
+            LeadModel(
+                id=2,
+                company_name="Corner Store Plus",
+                contact_person="Sarah Johnson",
+                email="sarah@cornerstore.com",
+                phone="5555551234",
+                location="Suburb Area",
+                business_type="convenience_store",
+                expected_volume="medium",
+                status="contacted",
+                source="referral",
+                notes="Follow up scheduled for next week"
+            ),
+            LeadModel(
+                id=3,
+                company_name="Mega Supermart",
+                contact_person="Mike Wilson",
+                email="mike@megasupermart.com",
+                phone="7777777777",
+                location="Mall District",
+                business_type="supermarket",
+                expected_volume="high",
+                status="qualified",
+                source="trade_show",
+                notes="Very interested, ready to discuss terms"
+            )
+        ]
+        db.add_all(leads)
         db.commit()
 
     db.close()
@@ -146,6 +198,7 @@ app.include_router(products_router, prefix="/products")
 app.include_router(production_router, prefix="/production")
 app.include_router(qc_router, prefix="/qc")
 app.include_router(fg_router, prefix="/finished_goods")
+app.include_router(leads_router, prefix="/leads")
 
 
 @app.get("/")
