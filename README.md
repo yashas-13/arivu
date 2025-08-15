@@ -1,19 +1,113 @@
-# Arivu Supply Chain Management System
+# Arivu Supply Chain Management System with CRM
 
 ## Overview
-A modular FastAPI-based B2B supply chain management system for Arivu Foods. It
-includes a unified backend and a small HTML/JS frontend.
+A comprehensive FastAPI-based B2B supply chain management system with integrated CRM for Arivu Foods. Features a unified backend and responsive frontend for managing FMCG operations, inventory, and customer relationships.
 
-Main highlights:
-- Inventory, Orders, Customers, Billing, Analytics, Notifications and Audit
-- Production planning, Quality Control and Finished Goods tracking
-- Manufacturer and Retailer user roles
-- JWT authentication and SQLite persistent storage
-- Real PDF invoice generation and email notifications (demo)
+## 🚀 Main Features:
+- **CRM & Lead Management**: Full-featured lead pipeline management with conversion tracking
+- **Inventory Management**: Real-time stock tracking with automated alerts
+- **Multi-User Dashboards**: Specialized interfaces for CEO, Sales Manager, and Retail Partners
+- **Order Management**: End-to-end order processing and fulfillment
+- **Production Planning**: Quality Control and Finished Goods tracking
+- **Authentication**: JWT-based secure authentication with role-based access
+- **Analytics**: Comprehensive reporting and performance metrics
 
-Okay, focusing on concise, key features for manufacturing and retail roles for Arivu Foods:
+## 👥 User Roles & Access:
+- **CEO/Manufacturer**: Complete oversight, lead management, business analytics
+- **Sales Manager**: Lead pipeline management, conversion tracking, partner communications
+- **Retail Partners**: Inventory management, stock requests, order placement
+- **Standard Retailer**: Product browsing, order placement, account management
 
-Core Product Identification & Details:
+## 🆕 CRM Features Added:
+- **Lead Management**: Create, track, and convert potential retail partners
+- **Pipeline Tracking**: Visual sales funnel with conversion metrics
+- **Lead Conversion**: Seamlessly convert qualified leads to active retailers
+- **Performance Analytics**: Conversion rates, pipeline statistics, and KPIs
+- **Communication Center**: Integrated messaging and contact management
+
+## 📱 Dashboard Features:
+
+### CEO Dashboard (`/ceo_dashboard.html`)
+- **Executive Overview**: Total leads, active retailers, revenue metrics
+- **Lead Pipeline Management**: Visual pipeline with lead status tracking
+- **Lead Conversion**: Direct lead-to-retailer conversion functionality
+- **Business Intelligence**: Inventory overview, recent orders, KPIs
+- **Quick Actions**: Add new leads, manage pipeline, monitor performance
+
+### Sales Manager Dashboard (`/sales_manager_dashboard.html`)
+- **Lead Management**: Comprehensive lead tracking and management
+- **Pipeline Analytics**: Detailed funnel visualization and metrics
+- **Task Management**: Daily tasks, follow-ups, and activity feed
+- **Performance Tracking**: Conversion rates, targets, and achievements
+- **Quick Tools**: Bulk import, scheduling, reporting features
+
+### Enhanced Retail Partner Dashboard (`/enhanced_retailer_dashboard.html`)
+- **Inventory Management**: Real-time stock monitoring with status alerts
+- **Stock Request System**: Automated replenishment requests with urgency levels
+- **Performance Metrics**: Inventory turnover, accuracy, fulfillment rates
+- **Communication Hub**: Direct supplier communication and notifications
+- **Order Management**: Recent orders, status tracking, easy reordering
+
+## 🛠 API Endpoints:
+
+### CRM & Leads (`/leads/`)
+- `GET /leads/` - List all leads with filtering options
+- `POST /leads/` - Create new lead
+- `GET /leads/{id}` - Get specific lead details
+- `PUT /leads/{id}` - Update lead information
+- `DELETE /leads/{id}` - Remove lead
+- `POST /leads/{id}/convert` - Convert lead to retailer
+- `GET /leads/stats/pipeline` - Get pipeline statistics
+
+### Authentication (`/auth/`)
+- `POST /auth/login` - User authentication (supports manufacturer, sales_manager, retailer roles)
+
+### Products & Inventory (`/products/`, `/inventory/`)
+- Complete CRUD operations for product management
+- Real-time inventory tracking and updates
+
+### Orders & Customers (`/orders/`, `/customers/`)
+- Order processing and fulfillment tracking
+- Customer/retailer management
+
+## 🔐 User Credentials (Demo):
+- **CEO/Manufacturer**: `manufacturer` / `password`
+- **Sales Manager**: `sales_manager` / `password`  
+- **Retailer**: `retailer1@example.com` / `password`
+
+## 🚀 Quick Start:
+
+### Installation & Setup:
+```bash
+# Clone the repository
+git clone https://github.com/yashas-13/arivu.git
+cd arivu
+
+# Create virtual environment
+python -m venv arivu-venv
+source arivu-venv/bin/activate  # Linux/Mac
+# arivu-venv\Scripts\activate  # Windows
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Start the server
+uvicorn supply_chain_system.main:app --reload --port 8000
+```
+
+### Access Dashboards:
+- **CEO Dashboard**: http://localhost:8000/ceo_dashboard.html
+- **Sales Manager**: http://localhost:8000/sales_manager_dashboard.html
+- **Retail Partner**: http://localhost:8000/enhanced_retailer_dashboard.html
+- **API Documentation**: http://localhost:8000/docs
+
+### Sample Data Included:
+- 3 demonstration leads in various pipeline stages
+- 2 sample products with inventory
+- 1 converted retailer from lead conversion
+- Sample orders and performance metrics
+
+## Core Product Features:
 
 Product Name: (e.g., "Low-Carb Multi Seeds Atta", "Groundnut Oil") - This is the primary display name of the product.
 SKU (Stock Keeping Unit): A unique alphanumeric code for each specific product variant (e.g., AF-LCA-1KG, AF-GNO-1L). This is crucial for tracking.
