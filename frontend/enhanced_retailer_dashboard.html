@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retail Partner Dashboard - Arivu Supply Chain</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="api.js"></script>
+    <style>
+        .inventory-low { background-color: #fff3cd; }
+        .inventory-critical { background-color: #f8d7da; }
+        .inventory-good { background-color: #d1edff; }
+        .metric-card { transition: transform 0.2s; }
+        .metric-card:hover { transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-info">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Arivu Supply Chain</a>
+            <span class="navbar-text">Retail Partner Dashboard</span>
+            <div class="ms-auto">
+                <span class="text-white me-3">Welcome, <span id="partnerName">Partner</span></span>
+                <button class="btn btn-outline-light btn-sm" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <!-- Key Metrics -->
+            <div class="col-12 mb-4">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card metric-card bg-primary text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">Total Products</h5>
+                                <h2 id="totalProducts">-</h2>
+                                <small>In your inventory</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card metric-card bg-warning text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">Low Stock Alert</h5>
+                                <h2 id="lowStockCount">-</h2>
+                                <small>Items need reorder</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card metric-card bg-success text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">This Month Sales</h5>
+                                <h2 id="monthlySales">-</h2>
+                                <small>Total revenue</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card metric-card bg-info text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">Order Status</h5>
+                                <h2 id="pendingOrders">-</h2>
+                                <small>Pending orders</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inventory Management -->
+            <div class="col-md-8 mb-4">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5>Inventory Management</h5>
+                        <div>
+                            <button class="btn btn-primary btn-sm me-2" onclick="requestStock()">Request Stock</button>
+                            <select id="stockFilter" class="form-select form-select-sm" onchange="filterInventory()">
+                                <option value="">All Items</option>
+                                <option value="low">Low Stock</option>
+                                <option value="critical">Critical</option>
+                                <option value="good">Good Stock</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-hover" id="inventoryTable">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>SKU</th>
+                                    <th>Current Stock</th>
+                                    <th>Status</th>
+                                    <th>Price</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions & Alerts -->
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-success" onclick="createOrder()">
+                                <i class="bi bi-cart-plus"></i> Create New Order
+                            </button>
+                            <button class="btn btn-info" onclick="viewCatalog()">
+                                <i class="bi bi-book"></i> View Product Catalog
+                            </button>
+                            <button class="btn btn-warning" onclick="generateReport()">
+                                <i class="bi bi-file-text"></i> Inventory Report
+                            </button>
+                        </div>
+                        
+                        <hr>
+                        
+                        <h6>Stock Alerts</h6>
+                        <div id="stockAlerts" class="alert-container">
+                            <!-- Stock alerts will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Orders -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Recent Orders</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-sm" id="ordersTable">
+                            <thead>
+                                <tr>
+                                    <th>Order #</th>
+                                    <th>Date</th>
+                                    <th>Items</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        <div class="text-center mt-3">
+                            <a href="#" onclick="showAllOrders()" class="btn btn-outline-primary btn-sm">View All Orders</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Metrics -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Performance Metrics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Inventory Turnover</span>
+                                <span class="fw-bold">2.4x</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-success" style="width: 60%"></div>
+                            </div>
+                            <small class="text-muted">vs last month</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Stock Accuracy</span>
+                                <span class="fw-bold">94%</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-info" style="width: 94%"></div>
+                            </div>
+                            <small class="text-muted">Target: 95%</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Order Fulfillment</span>
+                                <span class="fw-bold">87%</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-warning" style="width: 87%"></div>
+                            </div>
+                            <small class="text-muted">Last 30 days</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Supplier Communication -->
+            <div class="col-md-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Communication Center</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Recent Messages</h6>
+                                <div class="list-group">
+                                    <div class="list-group-item">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">Stock Replenishment Update</h6>
+                                            <small>2 hours ago</small>
+                                        </div>
+                                        <p class="mb-1">Your order #1234 is ready for pickup</p>
+                                        <small>From: Arivu Operations</small>
+                                    </div>
+                                    <div class="list-group-item">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">New Product Alert</h6>
+                                            <small>1 day ago</small>
+                                        </div>
+                                        <p class="mb-1">New organic product line available</p>
+                                        <small>From: Product Team</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Quick Contact</h6>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <button class="btn btn-outline-primary w-100 mb-2">
+                                            <i class="bi bi-telephone"></i><br>
+                                            Call Support
+                                        </button>
+                                    </div>
+                                    <div class="col-6">
+                                        <button class="btn btn-outline-info w-100 mb-2">
+                                            <i class="bi bi-chat"></i><br>
+                                            Live Chat
+                                        </button>
+                                    </div>
+                                    <div class="col-6">
+                                        <button class="btn btn-outline-warning w-100">
+                                            <i class="bi bi-envelope"></i><br>
+                                            Email Sales
+                                        </button>
+                                    </div>
+                                    <div class="col-6">
+                                        <button class="btn btn-outline-success w-100">
+                                            <i class="bi bi-question-circle"></i><br>
+                                            FAQ
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stock Request Modal -->
+    <div class="modal fade" id="stockRequestModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Request Stock Replenishment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="stockRequestForm">
+                        <div class="mb-3">
+                            <label for="productSelect" class="form-label">Select Product</label>
+                            <select class="form-control" id="productSelect" required>
+                                <option value="">Choose product...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="requestQuantity" class="form-label">Quantity Needed</label>
+                            <input type="number" class="form-control" id="requestQuantity" min="1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="urgency" class="form-label">Urgency Level</label>
+                            <select class="form-control" id="urgency">
+                                <option value="normal">Normal</option>
+                                <option value="urgent">Urgent</option>
+                                <option value="critical">Critical</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="requestNotes" class="form-label">Additional Notes</label>
+                            <textarea class="form-control" id="requestNotes" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="submitStockRequest()">Submit Request</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let retailerId = 1; // Mock retailer ID - would come from authentication
+        let allProducts = [];
+
+        async function loadDashboard() {
+            try {
+                // Load products for inventory display
+                const productsResp = await fetch('/products/');
+                allProducts = await productsResp.json();
+                
+                // Update metrics
+                updateMetrics();
+                
+                // Load inventory display
+                displayInventory(allProducts);
+                
+                // Load recent orders
+                loadRecentOrders();
+                
+                // Generate stock alerts
+                generateStockAlerts();
+                
+                // Populate product select for stock requests
+                populateProductSelect();
+                
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        function updateMetrics() {
+            document.getElementById('totalProducts').textContent = allProducts.length;
+            
+            // Calculate low stock items (less than 30)
+            const lowStockItems = allProducts.filter(p => p.current_stock_quantity < 30);
+            document.getElementById('lowStockCount').textContent = lowStockItems.length;
+            
+            // Mock data for other metrics
+            document.getElementById('monthlySales').textContent = '$12,450';
+            document.getElementById('pendingOrders').textContent = '3';
+        }
+
+        function displayInventory(products) {
+            const tbody = document.querySelector('#inventoryTable tbody');
+            tbody.innerHTML = '';
+            
+            products.forEach(product => {
+                const tr = document.createElement('tr');
+                const stockStatus = getStockStatus(product.current_stock_quantity);
+                
+                tr.className = getStockRowClass(stockStatus);
+                tr.innerHTML = `
+                    <td>
+                        <strong>${product.name}</strong><br>
+                        <small class="text-muted">${product.description || 'No description'}</small>
+                    </td>
+                    <td>${product.sku}</td>
+                    <td>
+                        <span class="fw-bold">${product.current_stock_quantity}</span> ${product.uom}
+                    </td>
+                    <td>
+                        <span class="badge bg-${getStockBadgeColor(stockStatus)}">${stockStatus}</span>
+                    </td>
+                    <td>$${product.mrp}</td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary" onclick="requestProductStock(${product.id})">
+                                Request
+                            </button>
+                            <button class="btn btn-outline-info" onclick="viewProductDetails(${product.id})">
+                                Details
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function getStockStatus(quantity) {
+            if (quantity <= 10) return 'Critical';
+            if (quantity <= 30) return 'Low';
+            return 'Good';
+        }
+
+        function getStockRowClass(status) {
+            const classes = {
+                'Critical': 'inventory-critical',
+                'Low': 'inventory-low',
+                'Good': 'inventory-good'
+            };
+            return classes[status] || '';
+        }
+
+        function getStockBadgeColor(status) {
+            const colors = {
+                'Critical': 'danger',
+                'Low': 'warning',
+                'Good': 'success'
+            };
+            return colors[status] || 'secondary';
+        }
+
+        function filterInventory() {
+            const filter = document.getElementById('stockFilter').value;
+            let filteredProducts = allProducts;
+            
+            if (filter === 'low') {
+                filteredProducts = allProducts.filter(p => p.current_stock_quantity <= 30 && p.current_stock_quantity > 10);
+            } else if (filter === 'critical') {
+                filteredProducts = allProducts.filter(p => p.current_stock_quantity <= 10);
+            } else if (filter === 'good') {
+                filteredProducts = allProducts.filter(p => p.current_stock_quantity > 30);
+            }
+            
+            displayInventory(filteredProducts);
+        }
+
+        async function loadRecentOrders() {
+            try {
+                const resp = await fetch('/orders');
+                const orders = await resp.json();
+                
+                const tbody = document.querySelector('#ordersTable tbody');
+                tbody.innerHTML = '';
+                
+                // Filter orders for this retailer and show recent ones
+                const retailerOrders = orders.filter(o => o.retailer_id === retailerId).slice(0, 5);
+                
+                retailerOrders.forEach(order => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>#${order.id}</td>
+                        <td>${order.order_date ? new Date(order.order_date).toLocaleDateString() : 'N/A'}</td>
+                        <td>-</td>
+                        <td>$${order.total_amount}</td>
+                        <td><span class="badge bg-${order.status === 'shipped' ? 'success' : 'warning'}">${order.status}</span></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error('Error loading orders:', error);
+            }
+        }
+
+        function generateStockAlerts() {
+            const alertsContainer = document.getElementById('stockAlerts');
+            const criticalItems = allProducts.filter(p => p.current_stock_quantity <= 10);
+            const lowItems = allProducts.filter(p => p.current_stock_quantity <= 30 && p.current_stock_quantity > 10);
+            
+            alertsContainer.innerHTML = '';
+            
+            criticalItems.forEach(item => {
+                const alert = document.createElement('div');
+                alert.className = 'alert alert-danger alert-sm mb-2';
+                alert.innerHTML = `<strong>Critical:</strong> ${item.name} (${item.current_stock_quantity} left)`;
+                alertsContainer.appendChild(alert);
+            });
+            
+            lowItems.forEach(item => {
+                const alert = document.createElement('div');
+                alert.className = 'alert alert-warning alert-sm mb-2';
+                alert.innerHTML = `<strong>Low:</strong> ${item.name} (${item.current_stock_quantity} left)`;
+                alertsContainer.appendChild(alert);
+            });
+            
+            if (criticalItems.length === 0 && lowItems.length === 0) {
+                const alert = document.createElement('div');
+                alert.className = 'alert alert-success alert-sm mb-2';
+                alert.innerHTML = 'All inventory levels are good!';
+                alertsContainer.appendChild(alert);
+            }
+        }
+
+        function populateProductSelect() {
+            const select = document.getElementById('productSelect');
+            select.innerHTML = '<option value="">Choose product...</option>';
+            
+            allProducts.forEach(product => {
+                const option = document.createElement('option');
+                option.value = product.id;
+                option.textContent = `${product.name} (${product.sku})`;
+                select.appendChild(option);
+            });
+        }
+
+        function requestStock() {
+            const modal = new bootstrap.Modal(document.getElementById('stockRequestModal'));
+            modal.show();
+        }
+
+        function requestProductStock(productId) {
+            const product = allProducts.find(p => p.id === productId);
+            if (product) {
+                document.getElementById('productSelect').value = productId;
+                requestStock();
+            }
+        }
+
+        function submitStockRequest() {
+            const productId = document.getElementById('productSelect').value;
+            const quantity = document.getElementById('requestQuantity').value;
+            const urgency = document.getElementById('urgency').value;
+            const notes = document.getElementById('requestNotes').value;
+            
+            if (!productId || !quantity) {
+                alert('Please select a product and specify quantity');
+                return;
+            }
+            
+            // Mock submission - in real app would send to backend
+            alert(`Stock request submitted!\nProduct: ${productId}\nQuantity: ${quantity}\nUrgency: ${urgency}`);
+            
+            const modal = bootstrap.Modal.getInstance(document.getElementById('stockRequestModal'));
+            modal.hide();
+            
+            // Reset form
+            document.getElementById('stockRequestForm').reset();
+        }
+
+        // Mock functions for additional features
+        function createOrder() {
+            window.location.href = '/browse_products.html';
+        }
+
+        function viewCatalog() {
+            window.location.href = '/products.html';
+        }
+
+        function generateReport() {
+            alert('Inventory report feature - would generate PDF/Excel report');
+        }
+
+        function showAllOrders() {
+            window.location.href = '/my_orders.html';
+        }
+
+        function viewProductDetails(productId) {
+            alert(`Product details for ID: ${productId} - would show detailed view`);
+        }
+
+        function logout() {
+            // Mock logout
+            alert('Logout functionality - would clear session');
+        }
+
+        // Load dashboard on page load
+        loadDashboard();
+    </script>
+</body>
+</html>

@@ -13,6 +13,7 @@ from .models import (
     ReturnRequestModel,
     UserModel,
     Retailer,
+    LeadModel,
 )
 
 __all__ = [
@@ -31,4 +32,5 @@ __all__ = [
     "ReturnRequestModel",
     "UserModel",
     "Retailer",
+    "LeadModel",
 ]
